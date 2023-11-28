@@ -1,0 +1,40 @@
+1- 20,000,000
+
+2- 100,000
+
+3- 5,000
+
+4- 10 
+
+============
+
+new query 
+first level: 1-10
+
+second level:  1-500    ==> most load from ram   <=200
+
+
+third level:  1-200
+
+fourth: level: 1-200
+
+
+final retreving: 910 record
+
+=============================
+
+n_probe =2
+
+new query 
+first level: 2-10
+second level: 2-1000
+third level:  2-400
+fourth: level: 2-400
+
+
+
+
+
+
+
+
