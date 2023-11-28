@@ -43,7 +43,9 @@ def split_on_sign(data:[[float]],split_on)->int:
     '''
     if(split_on is None or split_on>np.shape(data)[1]):
         #split on the whole size
-        split_on=np.shape(data)[1]
+        # split_on=np.shape(data)[1]
+        split_on=10
+
     regions = []
     for col in data[:,:split_on].T:  # Transpose the matrix to iterate over columns
         positive_region = (col >= 0)
