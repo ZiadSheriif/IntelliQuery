@@ -21,6 +21,6 @@ def generate_random(k=100):
     file_path = "random_data.txt"
     np.savetxt(file_path, data)
     read_data = np.loadtxt(file_path)
-    print(read_data)
+    # print(read_data)
 
-generate_random(100)
+generate_random(1000)
