@@ -1,5 +1,6 @@
 import numpy as np
 import shutil
+import os
 
 # from sklearn.metrics.pairwise import cosine_similarity
 
@@ -53,3 +54,10 @@ def get_vector_from_id(data_path,id):
     read_data = np.loadtxt(data_path)
     return read_data[id]
 
+
+
+
+def check_dir(path):
+   if os.path.exists(path):
+    shutil.rmtree(path, ignore_errors=True, onerror=lambda func, path, exc: None)
+    os.makedirs(path)

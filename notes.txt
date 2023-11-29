@@ -37,7 +37,11 @@ third level:  2-400
 fourth: level: 2-400
 
 
+==================================
 
+20,000,000 record
+
+256 buckets ===> 256 file
 
 
 
