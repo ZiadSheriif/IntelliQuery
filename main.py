@@ -8,5 +8,5 @@ api_data = DataApi("test.bin")
 
 # print(api_data.get_record_by_id(5000))
 
-records = api_data.get_multiple_records_by_ids([2, 1, 5])
-print(records[5])
+records = api_data.get_multiple_records_by_ids([2, 1, 5,8000])
+print(records[8000])

@@ -62,6 +62,7 @@ class VecDBWorst:
                 data = fin.read(record_size)
                 if not data:
                     records[records_id[i]] = None
+                    continue
 
                 # Unpack the binary data into a dictionary
                 unpacked_data = struct.unpack("I70f", data)
