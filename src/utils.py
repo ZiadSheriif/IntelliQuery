@@ -27,8 +27,7 @@ def generate_random(k=100):
     # Read Data from File
     # read_data = np.loadtxt(file_path)
 
-# Test generate_random()
-# generate_random(1000)
+
 
 def array_to_dictionary(values,keys=None):
     '''
@@ -61,3 +60,7 @@ def check_dir(path):
    if os.path.exists(path):
     shutil.rmtree(path, ignore_errors=True, onerror=lambda func, path, exc: None)
     os.makedirs(path)
+
+
+# Test generate_random()
+generate_random(10000)

@@ -15,6 +15,7 @@ def LSH_index(data, nbits,index_path, d=70):
     d: vector dimension
     '''
     # create nbits Random hyperplanes used for portioning
+
     plane_norms = np.random.rand(nbits, d) - 0.5
 
 
@@ -89,7 +90,16 @@ def semantic_query_lsh(query, plane_norms,index_path):
     # return query_dot
     
     # Go to that file and just simply return buckets in it :D
-    index_result = np.loadtxt(os.path.join(index_path, hash_str+'.txt'),dtype=int)
+
+    file_path = os.path.join(index_path, hash_str+'.txt')
+
+    try:
+        index_result = np.loadtxt(file_path, dtype=int)
+    except FileNotFoundError:
+        # Handle the case where the file doesn't exist
+        print(f"The file {file_path} doesn't exist. Setting index_result to a default value.")
+        index_result = []  
+    # index_result = np.loadtxt(os.path.join(index_path, hash_str+'.txt'),dtype=int)
     print(index_result)
     return hash_str #Bucket no
     # return index_result
