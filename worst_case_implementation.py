@@ -1,8 +1,9 @@
 from typing import Dict, List, Annotated
+import struct
 import numpy as np
 
 class VecDBWorst:
-    def __init__(self, file_path = "saved_db.csv", new_db = True) -> None:
+    def __init__(self, file_path = "saved_db.bin", new_db = True) -> None:
         self.file_path = file_path
         if new_db:
             # just open new file to delete the old one
@@ -17,6 +18,73 @@ class VecDBWorst:
                 row_str = f"{id}," + ",".join([float(e) for e in embed])
                 fout.write(f"{row_str}\n")
         self._build_index()
+
+    def insert_records_binary(self, rows: List[Dict[int, Annotated[List[float], 70]]]):
+        with open(self.file_path, "ab") as fout:  # Open the file in binary mode for appending
+            for row in rows:
+                id, embed = row["id"], row["embed"]
+                # Pack the data into a binary format
+                data = struct.pack(f"I{70}f", id, *embed)
+                fout.write(data)
+        self._build_index()
+
+    def calculate_offset(self, record_id: int) -> int:
+        # Calculate the offset for a given record ID
+        record_size = struct.calcsize("I70f")
+        return (record_id - 1) * record_size
+
+    def read_record_by_id(self, record_id: int) -> Dict[int, Annotated[List[float], 70]]:
+        record_size = struct.calcsize("I70f")
+        offset = self.calculate_offset(record_id)
+
+        with open(self.file_path, "rb") as fin:
+            fin.seek(offset)  # Move the file pointer to the calculated offset
+            data = fin.read(record_size)
+            if not data:
+                return {}  # Record not found
+
+            # Unpack the binary data into a dictionary
+            unpacked_data = struct.unpack("I70f", data)
+            id_value, floats = unpacked_data[0], unpacked_data[1:]
+
+            # Create and return the record dictionary
+            record = {"id": id_value, "embed": list(floats)}
+            return {record_id: record}
+
+    def read_multiple_records_by_id(self, records_id: List[int]):
+        record_size = struct.calcsize("I70f")
+        records = {}
+
+        with open(self.file_path, "rb") as fin:
+            for i in range(len(records_id)):
+                offset = self.calculate_offset(records_id[i])
+                fin.seek(offset)  # Move the file pointer to the calculated offset
+                data = fin.read(record_size)
+                if not data:
+                    records[records_id[i]] = None
+
+                # Unpack the binary data into a dictionary
+                unpacked_data = struct.unpack("I70f", data)
+                id_value, floats = unpacked_data[0], unpacked_data[1:]
+
+                # Create and return the record dictionary
+                record = {"id": id_value, "embed": list(floats)}
+                records[records_id[i]] = record
+        return records
+
+    def get_top_k_records(self,k):
+        records = []
+        record_size = struct.calcsize("I70f")
+        with open(self.file_path,'rb') as fin:
+            fin.seek(0)
+            for i in range(k):
+                data = fin.read(record_size)
+                unpacked_data = struct.unpack("I70f", data)
+                id_value, floats = unpacked_data[0], unpacked_data[1:]
+
+                record = {"id": id_value, "embed": list(floats)} 
+                records.append(record)
+            return records
 
     def retrive(self, query: Annotated[List[float], 70], top_k = 5):
         scores = []
