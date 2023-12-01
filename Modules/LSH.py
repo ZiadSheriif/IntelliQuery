@@ -136,17 +136,22 @@ def get_top_k_similar(target_vector, data, k=5):
     :param k: The number of most similar vectors to find.
     :return: Indices of the top k most similar vectors, and the vectors themselves.
     """
-
     if len(data) < k:
         k = len(data)
 
+    print("target_vector",target_vector)
+    print("data",data)
+
     # Calculate cosine similarities using vectorized operations
+    # print("target_vector",target_vector)
+    # print("data",data[1:5])
     similarities = 1 - np.array([cosine(target_vector, vector) for vector in data])
 
     # Find the indices of the top k most similar vectors
     most_similar_indices = np.argpartition(-similarities, k)[:k]
 
     # Retrieve the top k most similar vectors
+    print("most_similar_indices",most_similar_indices)
     k_most_similar_vectors = data[most_similar_indices]
 
     return most_similar_indices, k_most_similar_vectors

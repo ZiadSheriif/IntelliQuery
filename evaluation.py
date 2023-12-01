@@ -1,5 +1,10 @@
 import numpy as np
 from worst_case_implementation import VecDBWorst
+from best_case_implementation import VecDBBest
+from api import DataApi
+import argparse
+import pandas as pd
+
 import time
 from dataclasses import dataclass
 from typing import List
@@ -13,33 +18,23 @@ class Result:
     db_ids: List[int]
     actual_ids: List[int]
 
-# def run_queries(db, np_rows, top_k, num_runs):
-def run_queries(db_ids, np_rows, top_k, num_runs,query):
+def run_queries(db, np_rows, top_k, num_runs):
     results = []
     for _ in range(num_runs):
-        # query = np.random.random((1,70))
+        query = np.random.random((1,70))
         
         tic = time.time()
-        # db_ids = db.retrive(query, top_k) #His Result
+        db_ids = db.retrive(query, top_k)
         toc = time.time()
         run_time = toc - tic
         
         tic = time.time()
-        # Correct
         actual_ids = np.argsort(np_rows.dot(query.T).T / (np.linalg.norm(np_rows, axis=1) * np.linalg.norm(query)), axis= 1).squeeze().tolist()[::-1]
         toc = time.time()
         np_run_time = toc - tic
-
-        print("Ours:",db_ids)
-        print("His:",actual_ids)
-        # print(get_indices_of_actual_vectors(db_ids,actual_ids))
         
         results.append(Result(run_time, top_k, db_ids, actual_ids))
     return results
-
-
-def get_indices_of_actual_vectors(ours,his):
-    return [his.index(element) for element in ours if element in his]
 
 def eval(results: List[Result]):
     # scores are negative. So getting 0 is the best score.
@@ -65,14 +60,35 @@ def eval(results: List[Result]):
 
 
 if __name__ == "__main__":
-    db = VecDBWorst()
-    records_np = np.random.random((10000, 70))
-    records_dict = [{"id": i, "embed": list(row)} for i, row in enumerate(records_np)]
-    _len = len(records_np)
-    db.insert_records(records_dict)
-    res = run_queries(db, records_np, 5, 10)
-    print(eval(res))
+
+    # Mode
+    parser = argparse.ArgumentParser(description='Description of your script')
+    parser.add_argument('-d','--debug', help='Description of the -d flag', action='store_true')
+    args = parser.parse_args()
+
+    worst_db = VecDBWorst('./DataBase/data.csv',new_db=not args.debug)
+    best_db = VecDBBest('./DataBase/data.bin','./DataBase',new_db=not args.debug)
+
+    if args.debug:
+        records_np = pd.read_csv('./DataBase/data.csv',header=None)
+        rows_without_first_element = np.array([row[1:].tolist() for _, row in records_np.iterrows()])
+        records_np=rows_without_first_element
+    else:
+
+        records_np = np.random.random((10000, 70))
+        records_dict = [{"id": i, "embed": list(row)} for i, row in enumerate(records_np)]
+        _len = len(records_np)
+
+        worst_db.insert_records(records_dict)
+        best_db.insert_records_binary(records_dict)
+
     
+    res = run_queries(worst_db, records_np, 5, 10)
+    print("Worst:",eval(res))
+
+    res = run_queries(best_db, records_np, 5, 10)
+    print("Best:",eval(res))
+
     # records_np = np.concatenate([records_np, np.random.random((90000, 70))])
     # records_dict = [{"id": i + _len, "embed": list(row)} for i, row in enumerate(records_np[_len:])]
     # _len = len(records_np)
