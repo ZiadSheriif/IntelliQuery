@@ -104,8 +104,8 @@ def semantic_query_lsh(query, plane_norms,index_path):
         print(f"The file {file_path} doesn't exist. Setting index_result to a default value.")
         index_result = []  
     # index_result = np.loadtxt(os.path.join(index_path, hash_str+'.txt'),dtype=int)
-    print(index_result)
-    return hash_str #Bucket no
+    
+    return hash_str,index_result #Bucket no
     # return index_result
 
 # # Write data to a text file

@@ -9,7 +9,7 @@ class DataApi:
 
   # Function to generate random embeddings
   def __generate_embeddings(self,num_records, embedding_dim):
-      return [np.random.rand(embedding_dim).tolist() for _ in range(num_records)]
+      return [np.random.random(embedding_dim).tolist() for _ in range(num_records)]
 
 
   def generate_data_file(self,num_of_records):
