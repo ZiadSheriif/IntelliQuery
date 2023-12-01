@@ -32,13 +32,13 @@ def run_queries(db_ids, np_rows, top_k, num_runs,query):
 
         print("Ours:",db_ids)
         print("His:",actual_ids)
-        print(x(db_ids,actual_ids))
+        # print(get_indices_of_actual_vectors(db_ids,actual_ids))
         
         results.append(Result(run_time, top_k, db_ids, actual_ids))
     return results
 
 
-def x(ours,his):
+def get_indices_of_actual_vectors(ours,his):
     return [his.index(element) for element in ours if element in his]
 
 def eval(results: List[Result]):

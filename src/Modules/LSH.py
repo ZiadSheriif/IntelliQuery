@@ -2,23 +2,25 @@ import numpy as np
 import os
 
 
-# TODO:
-#* 1) Build LSH function (indexing)
-#* 2) Build semantic query function (retrieval)
+from scipy.spatial.distance import cosine
 
-def LSH_index(data, nbits,index_path, d=70):
-    '''
+
+# TODO:
+# * 1) Build LSH function (indexing)
+# * 2) Build semantic query function (retrieval)
+
+
+def LSH_index(data, nbits, index_path, d=70):
+    """
     Function to Build the LSH indexing
     data:[{'id':int,'embed':vector}]
     nbits: no of bits of the Buckets
     index_path:path of the Result to be saved
     d: vector dimension
-    '''
+    """
     # create nbits Random hyperplanes used for portioning
 
     plane_norms = np.random.rand(nbits, d) - 0.5
-
-
 
     # If index Folder Doesn't Exist just Create it :D
     if not os.path.exists(index_path):
@@ -28,21 +30,21 @@ def LSH_index(data, nbits,index_path, d=70):
     # {id:1:[1,58,,2]}
 
     for item in data:
-        vector=item['embed']
-        id=item['id']
+        vector = item["embed"]
+        id = item["id"]
 
         # Dot Product with Random Planes
         data_dot_product = np.dot(vector, plane_norms.T)
-      
+
         # Decision Making
-        data_set_decision_hamming = (data_dot_product > 0)*1
+        data_set_decision_hamming = (data_dot_product > 0) * 1
 
         # Bucket no. (Key)
-        hash_str = ''.join(data_set_decision_hamming.astype(str)) # 101001101
+        hash_str = "".join(data_set_decision_hamming.astype(str))  # 101001101
 
         # TODO Write as batches
         # Add This vector to the bucket
-        file_path = os.path.join(index_path, hash_str+'.txt')
+        file_path = os.path.join(index_path, hash_str + ".txt")
 
         # Open File in Append Mode
         with open(file_path, "a") as file:
@@ -51,27 +53,27 @@ def LSH_index(data, nbits,index_path, d=70):
         # if hash_str not in buckets.keys():
         #     buckets[hash_str].append(id)
         #     buckets[hash_str] = []
-            
-    return plane_norms
-    
 
-def semantic_query_lsh(query, plane_norms,index_path):
-    '''
+    return plane_norms
+
+
+def semantic_query_lsh(query, plane_norms, index_path):
+    """
     Function to Query the LSH indexing
     query:[] query vector
     plane_norms: [[]]
     index_path:path of the Index to be Search in
-    '''
+    """
     # Dot Product with Random Planes
     query_dot = np.dot(query, plane_norms.T)
 
     # Decision Making
-    query_dot = (query_dot > 0)*1
+    query_dot = (query_dot > 0) * 1
 
     # Bucket no. (Key)
-    hash_str = ''.join(query_dot.astype(str)) # 101001101
+    hash_str = "".join(query_dot.astype(str))  # 101001101
 
-    #TODO @Ziad Sherif
+    # TODO @Ziad Sherif
     # if query_hash_str in buckets.keys():
     #     bucket_containing_query = buckets[query_hash_str]
     #     min_dist=100
@@ -86,27 +88,31 @@ def semantic_query_lsh(query, plane_norms,index_path):
     #             min_dist=res
     #             index=vec
 
-
     #     print(index)
     #     print("Query belongs to bucket:", bucket_containing_query)
     # else:
     #     print("Query doesn't match any existing buckets.")
     # return query_dot
-    
+
     # Go to that file and just simply return buckets in it :D
 
-    file_path = os.path.join(index_path, hash_str+'.txt')
+    file_path = os.path.join(index_path, hash_str + ".txt")
 
     try:
         index_result = np.loadtxt(file_path, dtype=int)
     except FileNotFoundError:
         # Handle the case where the file doesn't exist
-        print(f"The file {file_path} doesn't exist. Setting index_result to a default value.")
-        index_result = []  
+        print(
+            f"The file {file_path} doesn't exist. Setting index_result to a default value."
+        )
+        index_result = []
     # index_result = np.loadtxt(os.path.join(index_path, hash_str+'.txt'),dtype=int)
-    
-    return hash_str,index_result #Bucket no
+    if len(index_result) == 0:
+        print("Query doesn't match any existing buckets.")
+        return hash_str, np.array([99999999999999999])
+    return hash_str, np.array([index_result]).squeeze()  # Bucket no
     # return index_result
+
 
 # # Write data to a text file
 # file_path = "../random_data.txt"
@@ -120,3 +126,27 @@ def semantic_query_lsh(query, plane_norms,index_path):
 #
 # print(result)
 
+
+def get_top_k_similar(target_vector, data, k=5):
+    """
+    Find the top k most similar vectors in data to a given target_vector.
+
+    :param target_vector: The vector to compare against.
+    :param data: Dataset of vectors.
+    :param k: The number of most similar vectors to find.
+    :return: Indices of the top k most similar vectors, and the vectors themselves.
+    """
+
+    if len(data) < k:
+        k = len(data)
+
+    # Calculate cosine similarities using vectorized operations
+    similarities = 1 - np.array([cosine(target_vector, vector) for vector in data])
+
+    # Find the indices of the top k most similar vectors
+    most_similar_indices = np.argpartition(-similarities, k)[:k]
+
+    # Retrieve the top k most similar vectors
+    k_most_similar_vectors = data[most_similar_indices]
+
+    return most_similar_indices, k_most_similar_vectors
