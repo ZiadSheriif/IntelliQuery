@@ -15,7 +15,7 @@ class VecDBWorst:
         with open(self.file_path, "a+") as fout:
             for row in rows:
                 id, embed = row["id"], row["embed"]
-                row_str = f"{id}," + ",".join([float(e) for e in embed])
+                row_str = f"{id}," + ",".join([str(e) for e in embed])
                 fout.write(f"{row_str}\n")
         self._build_index()
 

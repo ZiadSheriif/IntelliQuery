@@ -13,23 +13,33 @@ class Result:
     db_ids: List[int]
     actual_ids: List[int]
 
-def run_queries(db, np_rows, top_k, num_runs):
+# def run_queries(db, np_rows, top_k, num_runs):
+def run_queries(db_ids, np_rows, top_k, num_runs,query):
     results = []
     for _ in range(num_runs):
-        query = np.random.random((1,70))
+        # query = np.random.random((1,70))
         
         tic = time.time()
-        db_ids = db.retrive(query, top_k)
+        # db_ids = db.retrive(query, top_k) #His Result
         toc = time.time()
         run_time = toc - tic
         
         tic = time.time()
+        # Correct
         actual_ids = np.argsort(np_rows.dot(query.T).T / (np.linalg.norm(np_rows, axis=1) * np.linalg.norm(query)), axis= 1).squeeze().tolist()[::-1]
         toc = time.time()
         np_run_time = toc - tic
+
+        print("Ours:",db_ids)
+        print("His:",actual_ids)
+        print(x(db_ids,actual_ids))
         
         results.append(Result(run_time, top_k, db_ids, actual_ids))
     return results
+
+
+def x(ours,his):
+    return [his.index(element) for element in ours if element in his]
 
 def eval(results: List[Result]):
     # scores are negative. So getting 0 is the best score.
@@ -63,12 +73,12 @@ if __name__ == "__main__":
     res = run_queries(db, records_np, 5, 10)
     print(eval(res))
     
-    records_np = np.concatenate([records_np, np.random.random((90000, 70))])
-    records_dict = [{"id": i + _len, "embed": list(row)} for i, row in enumerate(records_np[_len:])]
-    _len = len(records_np)
-    db.insert_records(records_dict)
-    res = run_queries(db, records_np, 5, 10)
-    print(eval(res))
+    # records_np = np.concatenate([records_np, np.random.random((90000, 70))])
+    # records_dict = [{"id": i + _len, "embed": list(row)} for i, row in enumerate(records_np[_len:])]
+    # _len = len(records_np)
+    # db.insert_records(records_dict)
+    # res = run_queries(db, records_np, 5, 10)
+    # print(eval(res))
 
     # records_np = np.concatenate([records_np, np.random.random((900000, 70))])
     # records_dict = [{"id": i + _len, "embed": list(row)} for i, row in enumerate(records_np[_len:])]

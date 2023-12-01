@@ -16,6 +16,8 @@ import os
 
 
 
+
+
 def generate_random(k=100):
     # Sample data: k vectors with 70 features each
     data = np.random.uniform(-1, 1, size=(k, 70))
