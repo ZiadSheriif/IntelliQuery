@@ -9,7 +9,7 @@ import os
 def LSH_index(data, nbits,index_path, d=70):
     '''
     Function to Build the LSH indexing
-    data:{vector_id:vector}
+    data:[{'id':int,'embed':vector}]
     nbits: no of bits of the Buckets
     index_path:path of the Result to be saved
     d: vector dimension
@@ -20,13 +20,17 @@ def LSH_index(data, nbits,index_path, d=70):
 
 
 
-    # IF Index Folder Doesn't Exist just Create it :D
+    # If index Folder Doesn't Exist just Create it :D
     if not os.path.exists(index_path):
         os.makedirs(index_path)
 
     # buckets = {}
+    # {id:1:[1,58,,2]}
 
-    for id, vector in data.items():
+    for item in data:
+        vector=item['embed']
+        id=item['id']
+
         # Dot Product with Random Planes
         data_dot_product = np.dot(vector, plane_norms.T)
       
