@@ -13,14 +13,10 @@ class Result:
     db_ids: List[int]
     actual_ids: List[int]
 
-def run_queries(db, np_rows, top_k, num_runs=1):
+def run_queries(db, np_rows, top_k, num_runs):
     results = []
     for _ in range(num_runs):
-        #TODO: testing with a random query 
-        # query = np.random.random((1,70))
-        query=np.loadtxt("./test.txt")
-        # print(query)
-        query=np.array([query])
+        query = np.random.random((1,70))
         
         tic = time.time()
         db_ids = db.retrive(query, top_k)
@@ -41,7 +37,7 @@ def eval(results: List[Result]):
     run_time = []
     for res in results:
         run_time.append(res.run_time)
-        # case for retrieving number not equal to top_k, socre will be the lowest
+        # case for retireving number not equal to top_k, socre will be the lowest
         if len(set(res.db_ids)) != res.top_k or len(res.db_ids) != res.top_k:
             scores.append( -1 * len(res.actual_ids) * res.top_k)
             continue
@@ -60,24 +56,19 @@ def eval(results: List[Result]):
 
 if __name__ == "__main__":
     db = VecDBWorst()
-    # records_np = np.random.random((10000, 70))
-    records_np=np.loadtxt("./random_data_10000.txt")
-
+    records_np = np.random.random((10000, 70))
     records_dict = [{"id": i, "embed": list(row)} for i, row in enumerate(records_np)]
-
-
     _len = len(records_np)
     db.insert_records(records_dict)
-    res = run_queries(db, records_np, 5, 1)
-    print("Result: ",res)
+    res = run_queries(db, records_np, 5, 10)
     print(eval(res))
     
-    # records_np = np.concatenate([records_np, np.random.random((90000, 70))])
-    # records_dict = [{"id": i + _len, "embed": list(row)} for i, row in enumerate(records_np[_len:])]
-    # _len = len(records_np)
-    # db.insert_records(records_dict)
-    # res = run_queries(db, records_np, 5, 10)
-    # print(eval(res))
+    records_np = np.concatenate([records_np, np.random.random((90000, 70))])
+    records_dict = [{"id": i + _len, "embed": list(row)} for i, row in enumerate(records_np[_len:])]
+    _len = len(records_np)
+    db.insert_records(records_dict)
+    res = run_queries(db, records_np, 5, 10)
+    print(eval(res))
 
     # records_np = np.concatenate([records_np, np.random.random((900000, 70))])
     # records_dict = [{"id": i + _len, "embed": list(row)} for i, row in enumerate(records_np[_len:])]

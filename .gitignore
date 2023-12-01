@@ -5,6 +5,8 @@ Database/
 __pycache__/
 *.py[cod]
 *$py.class
+*.csv
+*.bin
 
 # C extensions
 *.so
