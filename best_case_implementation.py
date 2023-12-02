@@ -40,8 +40,14 @@ class VecDBBest:
         '''
 
         # Level(1)
+        # VIP: Don't Delete Level(1) Directory
+
         # Level(2)
+        # VIP: Don't Delete Level(2) Directory
+        
         # Level(3)
+        # VIP: Don't Delete Level(3) Directory
+        
         pass
 
 
