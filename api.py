@@ -107,3 +107,8 @@ class DataApi:
               records.append(record)
           return records
 
+  def get_multiple_records_by_ids(self,record_ids):
+    return self.db.read_multiple_records_by_id(record_ids)
+
+  def insert_records_binary(self, rows: List[Dict[int, Annotated[List[float], 70]]]):
+    return self.db.insert_records_binary(rows)
