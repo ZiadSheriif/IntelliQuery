@@ -1,7 +1,7 @@
 import numpy as np
 from worst_case_implementation import VecDBWorst
-from best_case_implementation import VecDBBest
-from api import DataApi
+# from best_case_implementation import VecDBBest
+# from api import DataApi
 import argparse
 import pandas as pd
 
@@ -60,6 +60,7 @@ def eval(results: List[Result]):
 
 
 if __name__ == "__main__":
+    print("Hello")
 
     # Mode
     parser = argparse.ArgumentParser(description='Description of your script')
@@ -67,12 +68,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     worst_db = VecDBWorst('./DataBase/data.csv',new_db=not args.debug)
-    best_db = VecDBBest('./DataBase/data.bin','./DataBase',new_db=not args.debug)
+    # best_db = VecDBBest('./DataBase/data.bin','./DataBase',new_db=not args.debug)
 
     if args.debug:
-        records_np = pd.read_csv('./DataBase/data.csv',header=None)
-        rows_without_first_element = np.array([row[1:].tolist() for _, row in records_np.iterrows()])
-        records_np=rows_without_first_element
+        print("Debug")
+        # records_np = pd.read_csv('./DataBase/data.csv',header=None)
+        # rows_without_first_element = np.array([row[1:].tolist() for _, row in records_np.iterrows()])
+        # records_np=rows_without_first_element
     else:
 
         records_np = np.random.random((10000, 70))
@@ -80,28 +82,28 @@ if __name__ == "__main__":
         _len = len(records_np)
 
         worst_db.insert_records(records_dict)
-        best_db.insert_records_binary(records_dict)
+    #     best_db.insert_records_binary(records_dict)
 
     
     res = run_queries(worst_db, records_np, 5, 10)
     print("Worst:",eval(res))
 
-    res = run_queries(best_db, records_np, 5, 10)
-    print("Best:",eval(res))
+    # res = run_queries(best_db, records_np, 5, 10)
+    # print("Best:",eval(res))
 
-    # records_np = np.concatenate([records_np, np.random.random((90000, 70))])
-    # records_dict = [{"id": i + _len, "embed": list(row)} for i, row in enumerate(records_np[_len:])]
-    # _len = len(records_np)
-    # db.insert_records(records_dict)
-    # res = run_queries(db, records_np, 5, 10)
-    # print(eval(res))
+    records_np = np.concatenate([records_np, np.random.random((90000, 70))])
+    records_dict = [{"id": i + _len, "embed": list(row)} for i, row in enumerate(records_np[_len:])]
+    _len = len(records_np)
+    worst_db.insert_records(records_dict)
+    res = run_queries(worst_db, records_np, 5, 10)
+    print(eval(res))
 
-    # records_np = np.concatenate([records_np, np.random.random((900000, 70))])
-    # records_dict = [{"id": i + _len, "embed": list(row)} for i, row in enumerate(records_np[_len:])]
-    # _len = len(records_np)
-    # db.insert_records(records_dict)
-    # res = run_queries(db, records_np, 5, 10)
-    # eval(res)
+    records_np = np.concatenate([records_np, np.random.random((900000, 70))])
+    records_dict = [{"id": i + _len, "embed": list(row)} for i, row in enumerate(records_np[_len:])]
+    _len = len(records_np)
+    worst_db.insert_records(records_dict)
+    res = run_queries(worst_db, records_np, 5, 10)
+    eval(res)
 
     # records_np = np.concatenate([records_np, np.random.random((4000000, 70))])
     # records_dict = [{"id": i + _len, "embed": list(row)} for i, row in enumerate(records_np[_len:])]
