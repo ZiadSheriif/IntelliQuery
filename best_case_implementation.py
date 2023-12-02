@@ -38,6 +38,9 @@ class VecDBBest:
         '''
         Build the Index
         '''
+        # Read Data From File
+        read_data = self.data_api.get_top_k_records(10000)
+
 
         # Level(1)
         # VIP: Don't Delete Level(1) Directory
