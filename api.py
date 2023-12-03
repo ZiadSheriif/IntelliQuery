@@ -1,11 +1,14 @@
 import numpy as np
-from typing import Dict, List, Annotated
-import struct
-
+from worst_case_implementation import VecDBWorst
+from best_case_implementation import VecDBBest
 
 class DataApi:
-  def __init__(self, file_path) -> None:
+  def __init__(self, file_path, worst = False, database_path="./DataBase") -> None:
     self.file_path = file_path
+    if worst:
+      self.db = VecDBWorst(self.file_path,False)
+    else:
+      self.db = VecDBBest(self.file_path,database_path,False)
     self.chunk_size = 10000
 
   # Function to generate random embeddings

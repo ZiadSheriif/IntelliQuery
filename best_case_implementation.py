@@ -1,12 +1,8 @@
-import numpy as np
-import os
-from utils import empty_folder
-from api import DataApi
-from Modules.LSH import  *
 from typing import Dict, List, Annotated
 import numpy as np
 from utils import empty_folder
 from api import DataApi
+import struct
 
 class VecDBBest:
     def __init__(self,file_path="./DataBase/data.bin", database_path = "./DataBase", new_db = True) -> None:
@@ -15,7 +11,6 @@ class VecDBBest:
         '''
         self.file_path =file_path # Data File Path
         self.database_path= database_path  # Path of the Folder to Create Indexes
-        self.data_api= DataApi(file_path)
 
         if new_db:
             # If New Data Base
@@ -28,15 +23,50 @@ class VecDBBest:
                 pass
         
     def insert_records_binary(self, rows: List[Dict[int, Annotated[List[float], 70]]]):
-            self.data_api.insert_records_binary(rows)
-            # with open(self.file_path, "ab") as fout:  # Open the file in binary mode for appending
-            #     for row in rows:
-            #         id, embed = row["id"], row["embed"]
-            #         # Pack the data into a binary format
-            #         data = struct.pack(f"I{70}f", id, *embed)
-            #         fout.write(data)
-            self._build_index()
-            
+        with open(self.file_path, "ab") as fout:  # Open the file in binary mode for appending
+            for row in rows:
+                id, embed = row["id"], row["embed"]
+                # Pack the data into a binary format
+                data = struct.pack(f"I{70}f", id, *embed)
+                fout.write(data)
+        self._build_index()
+
+    def read_multiple_records_by_id(self, records_id: List[int]):
+        record_size = struct.calcsize("I70f")
+        records = {}
+
+        with open(self.file_path, "rb") as fin:
+            for i in range(len(records_id)):
+                offset = self.calculate_offset(records_id[i])
+                fin.seek(offset)  # Move the file pointer to the calculated offset
+                data = fin.read(record_size)
+                if not data:
+                    records[records_id[i]] = None
+                    continue
+
+                # Unpack the binary data into a dictionary
+                unpacked_data = struct.unpack("I70f", data)
+                id_value, floats = unpacked_data[0], unpacked_data[1:]
+
+                # Create and return the record dictionary
+                record = {"id": id_value, "embed": list(floats)}
+                records[records_id[i]] = record
+        return records
+
+    def get_top_k_records(self,k):
+        records = []
+        record_size = struct.calcsize("I70f")
+        with open(self.file_path,'rb') as fin:
+            fin.seek(0)
+            for i in range(k):
+                data = fin.read(record_size)
+                unpacked_data = struct.unpack("I70f", data)
+                id_value, floats = unpacked_data[0], unpacked_data[1:]
+
+                record = {"id": id_value, "embed": list(floats)} 
+                records.append(record)
+            return records
+
     def _build_index(self, Level_1_nbits=8, Level_2_nbits=3, Level_3_nbits=3)-> None:
     
         '''
@@ -44,7 +74,7 @@ class VecDBBest:
         '''
         
         # Layer 1 Indexing
-        level_1_in = self.data_api.get_top_k_records(10000)
+        level_1_in = self.get_top_k_records(10000)
         self.level_1_planes = LSH_index(data=level_1_in, nbits=Level_1_nbits, index_path=self.database_path + "/Level1")
 
         # Layer 2 Indexing
@@ -53,7 +83,7 @@ class VecDBBest:
             file_path = os.path.join(self.database_path + "/Level1", file_name)
             if os.path.isfile(file_path):
                 read_data_2 = np.loadtxt(file_path, dtype=int, ndmin=1)
-                level_2_in = self.data_api.get_multiple_records_by_ids(read_data_2 - 1)
+                level_2_in = self.read_multiple_records_by_id(read_data_2 - 1)
                 self.level_2_planes[file_name[:-4]] = LSH_index(data=level_2_in.values(), nbits=Level_2_nbits, index_path=self.database_path + "/Level2/" + file_name[:-4])
 
         # Layer 3 Indexing
@@ -65,7 +95,7 @@ class VecDBBest:
                 file_path = os.path.join(folder_path, file_name)
                 if os.path.isfile(file_path):
                     read_data_3 = np.loadtxt(file_path, dtype=int, ndmin=1)
-                    level_3_in = self.data_api.get_multiple_records_by_ids(read_data_3)
+                    level_3_in = self.read_multiple_records_by_id(read_data_3)
                     self.level_3_planes[folder_name][file_name[:-4]] = LSH_index(data=level_3_in.values(), nbits=Level_3_nbits, index_path=self.database_path + "/Level3/" + folder_name + '/' + file_name[:-4])
 
     def retrieve(self, query:Annotated[List[float], 70], top_k = 5,level=1)-> [int]:
@@ -84,7 +114,7 @@ class VecDBBest:
             # Retrieve from Level 3
             bucket_3,result_3 = semantic_query_lsh(query, self.level_3_planes[bucket_1][bucket_2], self.database_path + "/Level3")
         else:
-            index_result_3= self.data_api .get_multiple_records_by_ids(result_3)
+            index_result_3= self.read_multiple_records_by_id(result_3)
             level3_res_vectors=[entry['embed'] for entry in index_result_3.values()]
             top_result,_=get_top_k_similar(query,level3_res_vectors,10)
 
