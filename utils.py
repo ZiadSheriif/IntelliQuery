@@ -23,6 +23,8 @@ def extract_embeds(dict):
     # {505: {'id': 505, 'embed': [0.8,....]}} --> [[0.8,....],[.......]]
     return [entry['embed'] for entry in dict.values()]
 
+def extract_embeds_array(arr):
+    return np.array([entry['embed'] for entry in arr])
 
 # def generate_random(k=100):
 #     # Sample data: k vectors with 70 features each

@@ -2,6 +2,7 @@ import numpy as np
 from worst_case_implementation import VecDBWorst
 from best_case_implementation import VecDBBest
 import argparse
+from utils import extract_embeds_array
 import pandas as pd
 from api import DataApi
 
@@ -82,13 +83,18 @@ if __name__ == "__main__":
         # records_np=rows_without_first_element
     else:
 
+        # records_database = np.array(best_api.get_first_k_records(10000))
+
         records_np = np.random.random((10000, 70))
+        # records_np = extract_embeds_array(records_database)
+
+        # records_dict = [{"id": i, "embed": list(row)} for i, row in enumerate(records_np)]
+        
         records_dict = [{"id": i, "embed": list(row)} for i, row in enumerate(records_np)]
+        # records_dict = records_database
         _len = len(records_np)
 
-        # worst_db.insert_records(records_dict)
         worst_api.insert_records(records_dict)
-        # best_db.insert_records_binary(records_dict)
         best_api.insert_records_binary(records_dict)
 
     # query = np.array([best_api.get_multiple_records_by_ids([200])[200]['embed']])
