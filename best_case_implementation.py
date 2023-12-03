@@ -103,26 +103,27 @@ class VecDBBest:
                     level_3_in = self.read_multiple_records_by_id(read_data_3)
                     self.level_3_planes[folder_name][file_name[:-4]] = LSH_index(data=level_3_in.values(), nbits=Level_3_nbits, index_path=self.database_path + "/Level3/" + folder_name + '/' + file_name[:-4])
 
-    def retrive(self, query:Annotated[List[float], 70], top_k = 5,level=1)-> [int]:
+    def retrive(self, query:Annotated[List[float], 70], top_k = 5)-> [int]:
         '''
         Get the top_k vectors similar to the Query
 
         return:  list of the top_k similar vectors Ordered by Cosine Similarity
         '''
-        if level == 1:
-            # Retrieve from Level 1
-            bucket_1,result_1 = semantic_query_lsh(query, self.level_1_planes, self.database_path + "/Level1")
-        elif level == 2:
-            # Retrieve from Level 2
-            bucket_2,result_2 = semantic_query_lsh(query, self.level_2_planes[bucket_1], self.database_path + "/Level2")
-        elif level == 3:
-            # Retrieve from Level 3
-            bucket_3,result_3 = semantic_query_lsh(query, self.level_3_planes[bucket_1][bucket_2], self.database_path + "/Level3")
-        else:
-            index_result_3= self.read_multiple_records_by_id(result_3)
-            level3_res_vectors=[entry['embed'] for entry in index_result_3.values()]
+        bucket_1,result_1 = semantic_query_lsh(query, self.level_1_planes, self.database_path + "/Level1")
+
+        # Retrieve from Level 2
+        bucket_2,result_2 = semantic_query_lsh(query, self.level_2_planes[bucket_1], self.database_path + "/Level2/"+bucket_1)
+
+        # Retrieve from Level 3
+        bucket_3,result_3 = semantic_query_lsh(query, self.level_3_planes[bucket_1][bucket_2], self.database_path + "/Level3/"+bucket_1+'/'+bucket_2)
+
+        index_result_3= self.read_multiple_records_by_id(result_3)
+
+        level3_res_vectors=np.array([entry['embed'] for entry in index_result_3.values()])
         
         top_result,_=get_top_k_similar(query,level3_res_vectors,10)
-
+        print(top_result)
+        print('----------------------')
+        print(top_result.shape)
         return top_result
 

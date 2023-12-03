@@ -48,10 +48,7 @@ class DataApi:
   def insert_records(self, rows: List[Dict[int, Annotated[List[float], 70]]]):
     return self.db.insert_records(rows)
 
-  def retrive(self, query:Annotated[List[float], 70], top_k = 5,level=1):
-    if self.worst:
-      return self.db.retrive(query,top_k)
-    else:
-      return self.db.retrive(query,top_k,level)
+  def retrive(self, query:Annotated[List[float], 70], top_k = 5):
+    return self.db.retrive(query,top_k)
 
   
