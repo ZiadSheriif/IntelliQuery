@@ -5,6 +5,8 @@ __pycache__/
 *.csv
 *.bin
 
+DataBase
+
 # C extensions
 *.so
 
