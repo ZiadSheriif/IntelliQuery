@@ -3,6 +3,7 @@ from worst_case_implementation import VecDBWorst
 from best_case_implementation import VecDBBest
 import argparse
 import pandas as pd
+from api import DataApi
 
 import time
 from dataclasses import dataclass
@@ -66,8 +67,10 @@ if __name__ == "__main__":
     parser.add_argument('-d','--debug', help='Description of the -d flag', action='store_true')
     args = parser.parse_args()
 
-    worst_db = VecDBWorst('./DataBase/data.csv',new_db=not args.debug)
-    best_db = VecDBBest('./DataBase/data.bin','./DataBase',new_db=not args.debug)
+    # worst_db = VecDBWorst('./DataBase/data.csv',new_db=not args.debug)
+    worst_api = DataApi('./DataBase/data_worst.bin',True)
+    # best_db = VecDBBest('./DataBase/data.bin','./DataBase',new_db=not args.debug)
+    best_api = DataApi('./DataBase/data.bin', False,'./DataBase' )
 
     if args.debug:
         print("Debug")
@@ -80,14 +83,16 @@ if __name__ == "__main__":
         records_dict = [{"id": i, "embed": list(row)} for i, row in enumerate(records_np)]
         _len = len(records_np)
 
-        worst_db.insert_records(records_dict)
-        best_db.insert_records_binary(records_dict)
+        # worst_db.insert_records(records_dict)
+        worst_api.insert_records_binary(records_dict)
+        # best_db.insert_records_binary(records_dict)
+        best_api.insert_records_binary(records_dict)
 
     
-    res = run_queries(worst_db, records_np, 5, 10)
+    res = run_queries(worst_api, records_np, 5, 10)
     print("Worst:",eval(res))
 
-    res = run_queries(best_db, records_np, 5, 10)
+    res = run_queries(best_api, records_np, 5, 10)
     print("Best:",eval(res))
 
     # records_np = np.concatenate([records_np, np.random.random((90000, 70))])

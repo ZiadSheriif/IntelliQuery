@@ -1,7 +1,7 @@
 from typing import Dict, List, Annotated
 import numpy as np
 from utils import empty_folder
-from api import DataApi
+from Modules.LSH import *
 import struct
 
 class VecDBBest:
@@ -22,6 +22,11 @@ class VecDBBest:
                 # if you need to add any head to the file
                 pass
         
+    def calculate_offset(self, record_id: int) -> int:
+        # Calculate the offset for a given record ID
+        record_size = struct.calcsize("I70f")
+        return (record_id - 1) * record_size
+
     def insert_records_binary(self, rows: List[Dict[int, Annotated[List[float], 70]]]):
         with open(self.file_path, "ab") as fout:  # Open the file in binary mode for appending
             for row in rows:
@@ -37,6 +42,7 @@ class VecDBBest:
 
         with open(self.file_path, "rb") as fin:
             for i in range(len(records_id)):
+                print(records_id[i])
                 offset = self.calculate_offset(records_id[i])
                 fin.seek(offset)  # Move the file pointer to the calculated offset
                 data = fin.read(record_size)
@@ -98,7 +104,7 @@ class VecDBBest:
                     level_3_in = self.read_multiple_records_by_id(read_data_3)
                     self.level_3_planes[folder_name][file_name[:-4]] = LSH_index(data=level_3_in.values(), nbits=Level_3_nbits, index_path=self.database_path + "/Level3/" + folder_name + '/' + file_name[:-4])
 
-    def retrieve(self, query:Annotated[List[float], 70], top_k = 5,level=1)-> [int]:
+    def retrive(self, query:Annotated[List[float], 70], top_k = 5,level=1)-> [int]:
         '''
         Get the top_k vectors similar to the Query
 
