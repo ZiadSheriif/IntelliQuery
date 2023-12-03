@@ -70,6 +70,7 @@ def semantic_query_lsh(query, plane_norms, index_path):
     # Decision Making
     query_dot = (query_dot > 0) * 1
 
+    query_dot = query_dot.squeeze()
     # Bucket no. (Key)
     hash_str = "".join(query_dot.astype(str))  # 101001101
 

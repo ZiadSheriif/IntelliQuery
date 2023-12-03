@@ -6,10 +6,11 @@ from typing import Dict, List, Annotated
 class DataApi:
   def __init__(self, file_path, worst = False, database_path="./DataBase") -> None:
     self.file_path = file_path
+    self.worst = worst
     if worst:
-      self.db = VecDBWorst(self.file_path,False)
+      self.db = VecDBWorst(self.file_path,True)
     else:
-      self.db = VecDBBest(self.file_path,database_path,False)
+      self.db = VecDBBest(self.file_path,database_path,True)
     self.chunk_size = 10000
 
   # Function to generate random embeddings
@@ -44,3 +45,13 @@ class DataApi:
 
   def insert_records_binary(self, rows: List[Dict[int, Annotated[List[float], 70]]]):
     return self.db.insert_records_binary(rows)
+  def insert_records(self, rows: List[Dict[int, Annotated[List[float], 70]]]):
+    return self.db.insert_records(rows)
+
+  def retrive(self, query:Annotated[List[float], 70], top_k = 5,level=1):
+    if self.worst:
+      return self.db.retrive(query,top_k)
+    else:
+      return self.db.retrive(query,top_k,level)
+
+  

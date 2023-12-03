@@ -32,7 +32,10 @@ def run_queries(db, np_rows, top_k, num_runs):
         actual_ids = np.argsort(np_rows.dot(query.T).T / (np.linalg.norm(np_rows, axis=1) * np.linalg.norm(query)), axis= 1).squeeze().tolist()[::-1]
         toc = time.time()
         np_run_time = toc - tic
-        
+        # print('db ids ----------------')
+        # print(db_ids)
+        # print('actural ids ----------------')
+        # print(actual_ids)
         results.append(Result(run_time, top_k, db_ids, actual_ids))
     return results
 
@@ -68,7 +71,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # worst_db = VecDBWorst('./DataBase/data.csv',new_db=not args.debug)
-    worst_api = DataApi('./DataBase/data_worst.bin',True)
+    worst_api = DataApi('./DataBase/data_worst.csv',True)
     # best_db = VecDBBest('./DataBase/data.bin','./DataBase',new_db=not args.debug)
     best_api = DataApi('./DataBase/data.bin', False,'./DataBase' )
 
@@ -84,11 +87,14 @@ if __name__ == "__main__":
         _len = len(records_np)
 
         # worst_db.insert_records(records_dict)
-        worst_api.insert_records_binary(records_dict)
+        worst_api.insert_records(records_dict)
         # best_db.insert_records_binary(records_dict)
         best_api.insert_records_binary(records_dict)
 
-    
+    # query = np.array([best_api.get_multiple_records_by_ids([200])[200]['embed']])
+    # print(best_api.get_multiple_records_by_ids([200])[200]['embed'])
+    # print(query)
+
     res = run_queries(worst_api, records_np, 5, 10)
     print("Worst:",eval(res))
 

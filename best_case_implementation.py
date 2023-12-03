@@ -25,7 +25,7 @@ class VecDBBest:
     def calculate_offset(self, record_id: int) -> int:
         # Calculate the offset for a given record ID
         record_size = struct.calcsize("I70f")
-        return (record_id - 1) * record_size
+        return (record_id) * record_size
 
     def insert_records_binary(self, rows: List[Dict[int, Annotated[List[float], 70]]]):
         with open(self.file_path, "ab") as fout:  # Open the file in binary mode for appending
@@ -42,7 +42,6 @@ class VecDBBest:
 
         with open(self.file_path, "rb") as fin:
             for i in range(len(records_id)):
-                print(records_id[i])
                 offset = self.calculate_offset(records_id[i])
                 fin.seek(offset)  # Move the file pointer to the calculated offset
                 data = fin.read(record_size)
@@ -89,7 +88,7 @@ class VecDBBest:
             file_path = os.path.join(self.database_path + "/Level1", file_name)
             if os.path.isfile(file_path):
                 read_data_2 = np.loadtxt(file_path, dtype=int, ndmin=1)
-                level_2_in = self.read_multiple_records_by_id(read_data_2 - 1)
+                level_2_in = self.read_multiple_records_by_id(read_data_2)
                 self.level_2_planes[file_name[:-4]] = LSH_index(data=level_2_in.values(), nbits=Level_2_nbits, index_path=self.database_path + "/Level2/" + file_name[:-4])
 
         # Layer 3 Indexing
@@ -122,7 +121,8 @@ class VecDBBest:
         else:
             index_result_3= self.read_multiple_records_by_id(result_3)
             level3_res_vectors=[entry['embed'] for entry in index_result_3.values()]
-            top_result,_=get_top_k_similar(query,level3_res_vectors,10)
+        
+        top_result,_=get_top_k_similar(query,level3_res_vectors,10)
 
         return top_result
 
