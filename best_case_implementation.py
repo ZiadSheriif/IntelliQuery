@@ -79,6 +79,7 @@ class VecDBBest:
         '''
         
         # Layer 1 Indexing
+        # TODO: Here we are reading the whole file: Change later
         level_1_in = self.get_top_k_records(10000)
         level_1_planes = LSH_index(data=level_1_in, nbits=Level_1_nbits, index_path=self.database_path + "/Level1")
         np.save(self.database_path + "/Level1/"+'metadata.npy',level_1_planes)

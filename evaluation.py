@@ -77,15 +77,19 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # worst_db = VecDBWorst('./DataBase/data.csv',new_db=not args.debug)
-    worst_api = DataApi('./DataBase/data_worst.csv',True)
+    worst_api = DataApi('./DataBase/data_worst.csv',True,args.debug)
     # best_db = VecDBBest('./DataBase/data.bin','./DataBase',new_db=not args.debug)
-    best_api = DataApi('./DataBase/data.bin', False,'./DataBase' )
+    best_api = DataApi('./DataBase/data.bin', False,'./DataBase',args.debug)
 
-    if args.debug:
+    if not args.debug:
         print("Debug")
         # records_np = pd.read_csv('./DataBase/data.csv',header=None)
         # rows_without_first_element = np.array([row[1:].tolist() for _, row in records_np.iterrows()])
         # records_np=rows_without_first_element
+        records_database = np.array(best_api.get_first_k_records(10000))
+        records_np = extract_embeds_array(records_database)
+        records_dict = records_database
+        _len = len(records_np)
     else:
 
         # records_database = np.array(best_api.get_first_k_records(10000))

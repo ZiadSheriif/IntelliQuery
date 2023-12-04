@@ -4,13 +4,13 @@ from best_case_implementation import VecDBBest
 from typing import Dict, List, Annotated
 
 class DataApi:
-  def __init__(self, file_path, worst = False, database_path="./DataBase") -> None:
+  def __init__(self, file_path, worst = False, database_path="./DataBase", delete_db = True) -> None:
     self.file_path = file_path
     self.worst = worst
     if worst:
-      self.db = VecDBWorst(self.file_path,True)
+      self.db = VecDBWorst(self.file_path,delete_db)
     else:
-      self.db = VecDBBest(self.file_path,database_path,True)
+      self.db = VecDBBest(self.file_path,database_path,delete_db)
     self.chunk_size = 10000
 
   # Function to generate random embeddings
