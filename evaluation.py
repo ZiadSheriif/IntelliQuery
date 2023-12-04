@@ -49,14 +49,19 @@ def eval(results: List[Result]):
         # case for retireving number not equal to top_k, socre will be the lowest
         if len(set(res.db_ids)) != res.top_k or len(res.db_ids) != res.top_k:
             scores.append( -1 * len(res.actual_ids) * res.top_k)
+            print(len(set(res.db_ids)))
+            print(res.top_k)
+            print('retireving number not equal to top_k')
             continue
         score = 0
         for id in res.db_ids:
             try:
                 ind = res.actual_ids.index(id)
                 if ind > res.top_k * 3:
+                    print("not in top top_k*3")
                     score -= ind
             except:
+                print("not in ids")
                 score -= len(res.actual_ids)
         scores.append(score)
 

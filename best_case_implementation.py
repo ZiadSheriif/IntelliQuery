@@ -80,28 +80,31 @@ class VecDBBest:
         
         # Layer 1 Indexing
         level_1_in = self.get_top_k_records(10000)
-        self.level_1_planes = LSH_index(data=level_1_in, nbits=Level_1_nbits, index_path=self.database_path + "/Level1")
+        level_1_planes = LSH_index(data=level_1_in, nbits=Level_1_nbits, index_path=self.database_path + "/Level1")
+        np.save(self.database_path + "/Level1/"+'metadata.npy',level_1_planes)
+
+
 
         # Layer 2 Indexing
-        self.level_2_planes = {}
         for file_name in os.listdir(self.database_path + "/Level1"):
             file_path = os.path.join(self.database_path + "/Level1", file_name)
-            if os.path.isfile(file_path):
+            if os.path.isfile(file_path) and file_name.lower().endswith(".txt"):
                 read_data_2 = np.loadtxt(file_path, dtype=int, ndmin=1)
                 level_2_in = self.read_multiple_records_by_id(read_data_2)
-                self.level_2_planes[file_name[:-4]] = LSH_index(data=level_2_in.values(), nbits=Level_2_nbits, index_path=self.database_path + "/Level2/" + file_name[:-4])
+                level_2_planes = LSH_index(data=level_2_in.values(), nbits=Level_2_nbits, index_path=self.database_path + "/Level2/" + file_name[:-4])
+                np.save(self.database_path + "/Level2/" + file_name[:-4]+'/metadata.npy',level_2_planes)
 
         # Layer 3 Indexing
-        self.level_3_planes = {}
         for folder_name in os.listdir(self.database_path + "/Level2"):
-            self.level_3_planes[folder_name] = {}
             folder_path = os.path.join(self.database_path + "/Level2", folder_name)
             for file_name in os.listdir(folder_path):
                 file_path = os.path.join(folder_path, file_name)
-                if os.path.isfile(file_path):
+                if os.path.isfile(file_path) and file_name.lower().endswith(".txt"):
                     read_data_3 = np.loadtxt(file_path, dtype=int, ndmin=1)
                     level_3_in = self.read_multiple_records_by_id(read_data_3)
-                    self.level_3_planes[folder_name][file_name[:-4]] = LSH_index(data=level_3_in.values(), nbits=Level_3_nbits, index_path=self.database_path + "/Level3/" + folder_name + '/' + file_name[:-4])
+                    level_3_planes = LSH_index(data=level_3_in.values(), nbits=Level_3_nbits, index_path=self.database_path + "/Level3/" + folder_name + '/' + file_name[:-4])
+                    np.save(self.database_path + "/Level3/" + folder_name + '/' + file_name[:-4]+'/metadata.npy',level_3_planes)
+
 
     def retrive(self, query:Annotated[List[float], 70], top_k = 5)-> [int]:
         '''
@@ -109,21 +112,32 @@ class VecDBBest:
 
         return:  list of the top_k similar vectors Ordered by Cosine Similarity
         '''
-        bucket_1,result_1 = semantic_query_lsh(query, self.level_1_planes, self.database_path + "/Level1")
+
+        level_1_planes = np.load(self.database_path + "/Level1"+'/metadata.npy')
+        bucket_1,result_1 = semantic_query_lsh(query, level_1_planes, self.database_path + "/Level1")
+        
+        if len(result_1) < top_k:
+            print('level 1 smaller than top_k')
 
         # Retrieve from Level 2
-        bucket_2,result_2 = semantic_query_lsh(query, self.level_2_planes[bucket_1], self.database_path + "/Level2/"+bucket_1)
+        level_2_planes = np.load(self.database_path + "/Level2/"+bucket_1+'/metadata.npy')
+        bucket_2,result_2 = semantic_query_lsh(query, level_2_planes, self.database_path + "/Level2/"+bucket_1)
+
+        if len(result_2) < top_k:
+            print('level 2 smaller than top_k')
 
         # Retrieve from Level 3
-        bucket_3,result_3 = semantic_query_lsh(query, self.level_3_planes[bucket_1][bucket_2], self.database_path + "/Level3/"+bucket_1+'/'+bucket_2)
+        level_3_planes = np.load(self.database_path + "/Level3/"+bucket_1+'/'+bucket_2+'/metadata.npy')
+        bucket_3,result_3 = semantic_query_lsh(query, level_3_planes, self.database_path + "/Level3/"+bucket_1+'/'+bucket_2)
+
+        if len(result_3) < top_k:
+            print('level 3 smaller than top_k')
+
 
         index_result_3= self.read_multiple_records_by_id(result_3)
 
         level3_res_vectors=np.array([entry['embed'] for entry in index_result_3.values()])
         
-        top_result,_=get_top_k_similar(query,level3_res_vectors,10)
-        print(top_result)
-        print('----------------------')
-        print(top_result.shape)
+        top_result,_=get_top_k_similar(query,level3_res_vectors,top_k)
         return top_result
 

@@ -137,8 +137,6 @@ def get_top_k_similar(target_vector, data, k=5):
     :param k: The number of most similar vectors to find.
     :return: Indices of the top k most similar vectors, and the vectors themselves.
     """
-    if len(data) < k:
-        k = len(data)
 
     # print("target_vector",target_vector)
     # print("data",data)
@@ -146,7 +144,11 @@ def get_top_k_similar(target_vector, data, k=5):
     # Calculate cosine similarities using vectorized operations
     # print("target_vector",target_vector)
     # print("data",data[1:5])
-    print(data.shape)
+    
+    
+    # Solving the problem when we need elements more than the elements in bucket
+    k = min(data.shape[0] - 1,k)
+
     
     similarities = 1 - np.array([cosine(target_vector.T.squeeze(), vector) for vector in data])
 
