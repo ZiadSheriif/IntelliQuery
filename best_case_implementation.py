@@ -117,27 +117,31 @@ class VecDBBest:
         level_1_planes = np.load(self.database_path + "/Level1"+'/metadata.npy')
         bucket_1,result_1 = semantic_query_lsh(query, level_1_planes, self.database_path + "/Level1")
         
-        if len(result_1) < top_k:
-            print('level 1 smaller than top_k')
+        # if len(result_1) < top_k:
+        #     print('level 1 smaller than top_k')
 
-        # Retrieve from Level 2
-        level_2_planes = np.load(self.database_path + "/Level2/"+bucket_1+'/metadata.npy')
-        bucket_2,result_2 = semantic_query_lsh(query, level_2_planes, self.database_path + "/Level2/"+bucket_1)
+        # # Retrieve from Level 2
+        # level_2_planes = np.load(self.database_path + "/Level2/"+bucket_1+'/metadata.npy')
+        # bucket_2,result_2 = semantic_query_lsh(query, level_2_planes, self.database_path + "/Level2/"+bucket_1)
 
-        if len(result_2) < top_k:
-            print('level 2 smaller than top_k')
+        # if len(result_2) < top_k:
+        #     print('level 2 smaller than top_k')
 
-        # Retrieve from Level 3
-        level_3_planes = np.load(self.database_path + "/Level3/"+bucket_1+'/'+bucket_2+'/metadata.npy')
-        bucket_3,result_3 = semantic_query_lsh(query, level_3_planes, self.database_path + "/Level3/"+bucket_1+'/'+bucket_2)
+        # # Retrieve from Level 3
+        # level_3_planes = np.load(self.database_path + "/Level3/"+bucket_1+'/'+bucket_2+'/metadata.npy')
+        # bucket_3,result_3 = semantic_query_lsh(query, level_3_planes, self.database_path + "/Level3/"+bucket_1+'/'+bucket_2)
 
-        if len(result_3) < top_k:
-            print('level 3 smaller than top_k')
+        # if len(result_3) < top_k:
+        #     print('level 3 smaller than top_k')
 
 
-        index_result_3= self.read_multiple_records_by_id(result_3)
+        # index_result_3= self.read_multiple_records_by_id(result_3)
+        index_result_3= self.read_multiple_records_by_id(result_1)
+        
 
+        # level3_res_vectors=np.array([entry['embed'] for entry in index_result_3.values()])
         level3_res_vectors=np.array([entry['embed'] for entry in index_result_3.values()])
+        
         
         top_result,_=get_top_k_similar(query,level3_res_vectors,top_k)
         return top_result
