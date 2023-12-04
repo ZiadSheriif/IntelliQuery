@@ -19,11 +19,14 @@ class Result:
     db_ids: List[int]
     actual_ids: List[int]
 
-def run_queries(db, np_rows, top_k, num_runs):
+def run_queries(db, np_rows, top_k, num_runs, debug=False):
     results = []
-    for _ in range(num_runs):
-        query = np.random.random((1,70))
-        
+    for i in range(num_runs):
+        if debug:
+            query = np.random.random((1,70))
+            np.save( "./Database/q"+str(i)+'.npy',query)
+        else:
+            query = np.load( "./Database/q"+str(i)+'.npy')
         tic = time.time()
         db_ids = db.retrive(query, top_k)
         toc = time.time()
@@ -110,10 +113,10 @@ if __name__ == "__main__":
     # print(best_api.get_multiple_records_by_ids([200])[200]['embed'])
     # print(query)
 
-    res = run_queries(worst_api, records_np, 5, 10)
+    res = run_queries(worst_api, records_np, 5, 10, args.debug)
     print("Worst:",eval(res))
 
-    res = run_queries(best_api, records_np, 5, 10)
+    res = run_queries(best_api, records_np, 5, 10, args.debug)
     print("Best:",eval(res))
 
     # records_np = np.concatenate([records_np, np.random.random((90000, 70))])

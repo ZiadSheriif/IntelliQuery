@@ -107,8 +107,8 @@ def semantic_query_lsh(query, plane_norms, index_path):
     for filename, content in result.items():
         list_buckets.append(list(map(int, filename[:-4])))
     min_ham_buckets = get_top_k_hamming_distances(query_dot, list_buckets, 3)
-    print("query_dot",query_dot)
-    print("min_ham_buckets",min_ham_buckets)
+    # print("query_dot",query_dot)
+    # print("min_ham_buckets",min_ham_buckets)
 
    
     # TODO @Ziad Sherif
@@ -140,8 +140,9 @@ def semantic_query_lsh(query, plane_norms, index_path):
         file_path = os.path.join(index_path, "".join(map(str,bucket)) + ".txt")
         try:
             # index_result = np.loadtxt(file_path, dtype=int)
-            list_1 = np.loadtxt(file_path, dtype=int)
-            print("list_1",list_1)
+            list_1 = np.loadtxt(file_path, dtype=int, ndmin=1)
+            # print("list_1",list_1.shape)
+            
             index_result += list_1.tolist()
         except FileNotFoundError:
             # Handle the case where the file doesn't exist
