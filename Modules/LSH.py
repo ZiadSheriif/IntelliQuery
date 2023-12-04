@@ -3,6 +3,7 @@ import os
 
 
 from scipy.spatial.distance import cosine
+# from best_case_implementation import VecDBBest
 
 
 # TODO:
@@ -55,9 +56,47 @@ def LSH_index(data, nbits, index_path, d=70):
         #     buckets[hash_str] = []
 
     return plane_norms
+import os
+
+def get_top_k_hamming_distances(query, buckets, top_k):
+    distances = []
+    # Calculate Hamming distance for each bucket
+    for bucket in buckets:
+        hamming_distance = sum(bit1 != bit2 for bit1, bit2 in zip(query, bucket))
+        distances.append((bucket, hamming_distance))
+    # Sort distances and get the top K
+    sorted_distances = sorted(distances, key=lambda x: x[1])
+    top_k_distances = sorted_distances[:top_k]
+    return top_k_distances
+def read_text_files_in_folder(folder_path):
+    text_files_content = {}
+
+    # Iterate over all files in the folder
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+
+        # Check if the file is a text file
+        if filename.endswith('.txt') and os.path.isfile(file_path):
+            # Read the content of the text file
+            with open(file_path, 'r', encoding='utf-8') as file:
+                content = file.read()
+                # Store content in the dictionary with the filename as the key
+                text_files_content[filename] = content
+
+    return text_files_content
+
+# # Replace 'your_folder_path' with the actual path of the folder containing text files
+# folder_path = 'your_folder_path'
+# result = read_text_files_in_folder(folder_path)
+
+# # Print or manipulate the result as needed
+# for filename, content in result.items():
+#     print(f"File: {filename}\nContent:\n{content}\n{'=' * 30}\n")
 
 
 def semantic_query_lsh(query, plane_norms, index_path):
+    
+    
     """
     Function to Query the LSH indexing
     query:[] query vector
@@ -98,20 +137,42 @@ def semantic_query_lsh(query, plane_norms, index_path):
     # Go to that file and just simply return buckets in it :D
 
     file_path = os.path.join(index_path, hash_str + ".txt")
+    result = read_text_files_in_folder(index_path)
 
-    try:
-        index_result = np.loadtxt(file_path, dtype=int)
-    except FileNotFoundError:
-        # Handle the case where the file doesn't exist
-        print(
-            f"The file {file_path} doesn't exist. Setting index_result to a default value."
-        )
-        index_result = []
-    # index_result = np.loadtxt(os.path.join(index_path, hash_str+'.txt'),dtype=int)
-    if len(index_result) == 0:
-        print("Query doesn't match any existing buckets.")
-        return hash_str, np.array([99999999999999999])
-    return hash_str, np.array([index_result]).squeeze()  # Bucket no
+# # Print or manipulate the result as needed
+    list_buckets = []
+    for filename, content in result.items():
+        list_buckets.append(list(map(int, filename[:-4])))
+    min_ham_buckets = get_top_k_hamming_distances(query_dot, list_buckets, 3)
+    print("query_dot",query_dot)
+    print("min_ham_buckets",min_ham_buckets)
+    index_result =[]
+    for (bucket, hamming_distance) in min_ham_buckets:
+        file_path = os.path.join(index_path, "".join(map(str,bucket)) + ".txt")
+        # Convert a list of integers to a string
+        # my_list = [1, 2, 3, 4, 5]
+        # my_string = ''.join(map(str, my_list))
+
+        # print(my_string)  # Output: "12345"
+        # my_list = ['Hello', 'World', '!']
+        # my_string = ' '.join(my_list)
+        # print(my_string)
+        try:
+            list_1 = np.loadtxt(file_path, dtype=int)
+            print("list_1",list_1)
+            index_result +=np.array([list_1]).squeeze().tolist()
+        except FileNotFoundError:
+            # Handle the case where the file doesn't exist
+            print(
+                f"The file {file_path} doesn't exist. Setting index_result to a default value."
+            )
+            index_result = []
+        # index_result = np.loadtxt(os.path.join(index_path, hash_str+'.txt'),dtype=int)
+        # if len(index_result) == 0:
+        #     print("Query doesn't match any existing buckets.")
+        #     return hash_str, np.array([99999999999999999])
+        # print(index_result)
+    return hash_str, np.array(index_result) # Bucket no
     # return index_result
 
 

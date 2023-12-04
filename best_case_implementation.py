@@ -110,18 +110,22 @@ class VecDBBest:
         return:  list of the top_k similar vectors Ordered by Cosine Similarity
         '''
         bucket_1,result_1 = semantic_query_lsh(query, self.level_1_planes, self.database_path + "/Level1")
+        print("result",result_1.shape)
 
         # Retrieve from Level 2
-        bucket_2,result_2 = semantic_query_lsh(query, self.level_2_planes[bucket_1], self.database_path + "/Level2/"+bucket_1)
+        # bucket_2,result_2 = semantic_query_lsh(query, self.level_2_planes[bucket_1], self.database_path + "/Level2/"+bucket_1)
 
         # Retrieve from Level 3
-        bucket_3,result_3 = semantic_query_lsh(query, self.level_3_planes[bucket_1][bucket_2], self.database_path + "/Level3/"+bucket_1+'/'+bucket_2)
+        # bucket_3,result_3 = semantic_query_lsh(query, self.level_3_planes[bucket_1][bucket_2], self.database_path + "/Level3/"+bucket_1+'/'+bucket_2)
 
-        index_result_3= self.read_multiple_records_by_id(result_3)
+        # index_result_3= self.read_multiple_records_by_id(result_3)
+        index_result_1= self.read_multiple_records_by_id(result_1)
 
-        level3_res_vectors=np.array([entry['embed'] for entry in index_result_3.values()])
+        # level3_res_vectors=np.array([entry['embed'] for entry in index_result_3.values()])
+        level3_res_vectors=np.array([entry['embed'] for entry in index_result_1.values()])
         
-        top_result,_=get_top_k_similar(query,level3_res_vectors,10)
+        
+        top_result,_=get_top_k_similar(query,level3_res_vectors,top_k)
         print(top_result)
         print('----------------------')
         print(top_result.shape)

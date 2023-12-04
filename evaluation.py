@@ -35,8 +35,8 @@ def run_queries(db, np_rows, top_k, num_runs):
         np_run_time = toc - tic
         # print('db ids ----------------')
         # print(db_ids)
-        # print('actural ids ----------------')
-        # print(actual_ids)
+        print('actural ids ----------------')
+        print(actual_ids)
         results.append(Result(run_time, top_k, db_ids, actual_ids))
     return results
 
