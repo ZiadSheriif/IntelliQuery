@@ -10,7 +10,8 @@ import time
 from dataclasses import dataclass
 from typing import List
 
-AVG_OVERX_ROWS = 10
+AVG_OVERX_ROWS = 1
+DECIMALS = 8
 
 @dataclass
 class Result:
@@ -19,26 +20,42 @@ class Result:
     db_ids: List[int]
     actual_ids: List[int]
 
-def run_queries(db, np_rows, top_k, num_runs):
-    results = []
+def run_queries(db1,db2, np_rows, top_k, num_runs):
+    results_worst = []
+    results_best = []
     for _ in range(num_runs):
         query = np.random.random((1,70))
-        
+        # query_rounded = np.round(query, decimals=DECIMALS)
+        # np_rows_rounded = np.round(np_rows, decimals=DECIMALS)
+
+        # worst
         tic = time.time()
-        db_ids = db.retrive(query, top_k)
+        db_ids_worst = db1.retrive(query,top_k)
         toc = time.time()
-        run_time = toc - tic
+        run_time_worst = toc - tic
+        
+        # best
+        tic = time.time()
+        db_ids_best = db2.retrive(query,top_k)
+        toc = time.time()
+        run_time_best = toc - tic
         
         tic = time.time()
-        actual_ids = np.argsort(np_rows.dot(query.T).T / (np.linalg.norm(np_rows, axis=1) * np.linalg.norm(query)), axis= 1).squeeze().tolist()[::-1]
+        actual_ids = np.argsort(np_rows.dot(query.T).T / (np.linalg.norm(np_rows, axis=1) * np.linalg.norm(query)), axis=1).squeeze().tolist()[::-1]
+
         toc = time.time()
         np_run_time = toc - tic
-        # print('db ids ----------------')
-        # print(db_ids)
-        print('actural ids ----------------')
-        print(actual_ids)
-        results.append(Result(run_time, top_k, db_ids, actual_ids))
-    return results
+    
+        print("=======================================")
+        print("Best ids: ",db_ids_best[:top_k])
+        print("Actual ids: ",actual_ids[:top_k])
+        print("Worst ids: ",db_ids_worst)
+        print("Intersect: ",set(actual_ids[:top_k]).intersection(set(db_ids_best)))
+        print("Intersection in top k indices in the best DB: ",find_indices(actual_ids[:top_k], db_ids_best))
+        print("=======================================")
+        results_worst.append(Result(run_time_worst, top_k, db_ids_worst, actual_ids))
+        results_best.append(Result(run_time_best, top_k, db_ids_best, actual_ids))
+    return results_worst, results_best
 
 def eval(results: List[Result]):
     # scores are negative. So getting 0 is the best score.
@@ -62,6 +79,24 @@ def eval(results: List[Result]):
 
     return sum(scores) / len(scores), sum(run_time) / len(run_time)
 
+def find_indices(list1, list2):
+    """
+    Find the indices of elements of list1 in list2.
+    
+    :param list1: The list containing elements whose indices are to be found.
+    :param list2: The list in which to search for elements from list1.
+    :return: A list of indices.
+    """
+    indices = []
+    for element in list1:
+        # Convert both to numpy arrays for consistent handling
+        np_list2 = np.array(list2)
+        # Find the index of element in list2
+        found_indices = np.where(np_list2 == element)[0]
+        if found_indices.size > 0:
+            indices.append(found_indices[0])
+    
+    return indices
 
 if __name__ == "__main__":
     print("Hello")
@@ -84,6 +119,7 @@ if __name__ == "__main__":
     else:
 
         # records_database = np.array(best_api.get_first_k_records(10000))
+        print("Generating data file")
 
         records_np = np.random.random((10000, 70))
         # records_np = extract_embeds_array(records_database)
@@ -101,11 +137,14 @@ if __name__ == "__main__":
     # print(best_api.get_multiple_records_by_ids([200])[200]['embed'])
     # print(query)
 
-    res = run_queries(worst_api, records_np, 5, 10)
-    print("Worst:",eval(res))
+    # res = run_queries(worst_api, records_np, 5, 3)
+    # print("Worst:",eval(res))
 
-    res = run_queries(best_api, records_np, 5, 10)
-    print("Best:",eval(res))
+    # res = run_queries(best_api, records_np, 5, 3)
+    # print("Best:",eval(res))
+    results_worst, results_best = run_queries(worst_api,best_api, records_np, 10, AVG_OVERX_ROWS)
+    print("Worst:",eval(results_worst))
+    print("Best:",eval(results_best))
 
     # records_np = np.concatenate([records_np, np.random.random((90000, 70))])
     # records_dict = [{"id": i + _len, "embed": list(row)} for i, row in enumerate(records_np[_len:])]

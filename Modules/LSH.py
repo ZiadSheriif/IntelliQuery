@@ -27,8 +27,6 @@ def LSH_index(data, nbits, index_path, d=70):
     if not os.path.exists(index_path):
         os.makedirs(index_path)
 
-    # buckets = {}
-    # {id:1:[1,58,,2]}
 
     for item in data:
         vector = item["embed"]
@@ -43,7 +41,6 @@ def LSH_index(data, nbits, index_path, d=70):
         # Bucket no. (Key)
         hash_str = "".join(data_set_decision_hamming.astype(str))  # 101001101
 
-        # TODO Write as batches
         # Add This vector to the bucket
         file_path = os.path.join(index_path, hash_str + ".txt")
 
@@ -56,7 +53,6 @@ def LSH_index(data, nbits, index_path, d=70):
         #     buckets[hash_str] = []
 
     return plane_norms
-import os
 
 def get_top_k_hamming_distances(query, buckets, top_k):
     distances = []
@@ -110,31 +106,12 @@ def semantic_query_lsh(query, plane_norms, index_path):
     query_dot = (query_dot > 0) * 1
 
     query_dot = query_dot.squeeze()
+     # Ensure query_dot is 1D for string conversion
+    if query_dot.ndim == 0:
+        query_dot = np.array([query_dot])
     # Bucket no. (Key)
-    hash_str = "".join(query_dot.astype(str))  # 101001101
-
-    # TODO @Ziad Sherif
-    # if query_hash_str in buckets.keys():
-    #     bucket_containing_query = buckets[query_hash_str]
-    #     min_dist=100
-    #     index=-1
-    #     for vec in bucket_containing_query:
-    #         print(dataset[vec])
-    #         print(query)
-    #         dot_res=np.dot(query,dataset[vec].T)
-    #         print(dot_res)
-    #         res = dot_res / (np.linalg.norm(query) * np.linalg.norm(dataset[vec].T))
-    #         if res<min_dist:
-    #             min_dist=res
-    #             index=vec
-
-    #     print(index)
-    #     print("Query belongs to bucket:", bucket_containing_query)
-    # else:
-    #     print("Query doesn't match any existing buckets.")
-    # return query_dot
-
-    # Go to that file and just simply return buckets in it :D
+    # hash_str = "".join(query_dot.astype(str))  # 101001101
+    hash_str = "".join(map(str, query_dot.astype(int)))  # Converts boolean array to int and then to string
 
     file_path = os.path.join(index_path, hash_str + ".txt")
     result = read_text_files_in_folder(index_path)
@@ -143,35 +120,23 @@ def semantic_query_lsh(query, plane_norms, index_path):
     list_buckets = []
     for filename, content in result.items():
         list_buckets.append(list(map(int, filename[:-4])))
-    min_ham_buckets = get_top_k_hamming_distances(query_dot, list_buckets, 3)
-    print("query_dot",query_dot)
-    print("min_ham_buckets",min_ham_buckets)
+    min_ham_buckets = get_top_k_hamming_distances(query_dot, list_buckets, 5)
+    # print("query_dot",query_dot)
+    # print("min_ham_buckets",min_ham_buckets)
     index_result =[]
     for (bucket, hamming_distance) in min_ham_buckets:
         file_path = os.path.join(index_path, "".join(map(str,bucket)) + ".txt")
-        # Convert a list of integers to a string
-        # my_list = [1, 2, 3, 4, 5]
-        # my_string = ''.join(map(str, my_list))
-
-        # print(my_string)  # Output: "12345"
-        # my_list = ['Hello', 'World', '!']
-        # my_string = ' '.join(my_list)
-        # print(my_string)
         try:
             list_1 = np.loadtxt(file_path, dtype=int)
-            print("list_1",list_1)
-            index_result +=np.array([list_1]).squeeze().tolist()
+            list_buckets = np.atleast_1d(list_1).tolist()
+            index_result+=list_buckets
+
         except FileNotFoundError:
             # Handle the case where the file doesn't exist
             print(
                 f"The file {file_path} doesn't exist. Setting index_result to a default value."
             )
             index_result = []
-        # index_result = np.loadtxt(os.path.join(index_path, hash_str+'.txt'),dtype=int)
-        # if len(index_result) == 0:
-        #     print("Query doesn't match any existing buckets.")
-        #     return hash_str, np.array([99999999999999999])
-        # print(index_result)
     return hash_str, np.array(index_result) # Bucket no
     # return index_result
 
@@ -199,6 +164,7 @@ def get_top_k_similar(target_vector, data, k=5):
     :return: Indices of the top k most similar vectors, and the vectors themselves.
     """
     if len(data) < k:
+        print("Error: k is larger than the size of the dataset.")
         k = len(data)
 
     # print("target_vector",target_vector)
@@ -207,7 +173,7 @@ def get_top_k_similar(target_vector, data, k=5):
     # Calculate cosine similarities using vectorized operations
     # print("target_vector",target_vector)
     # print("data",data[1:5])
-    print(data.shape)
+    # print(data.shape)
     
     similarities = 1 - np.array([cosine(target_vector.T.squeeze(), vector) for vector in data])
 
@@ -215,7 +181,36 @@ def get_top_k_similar(target_vector, data, k=5):
     most_similar_indices = np.argpartition(-similarities, k)[:k]
 
     # Retrieve the top k most similar vectors
-    print("most_similar_indices",most_similar_indices)
+    # print("most_similar_indices",most_similar_indices)
     k_most_similar_vectors = data[most_similar_indices]
 
     return most_similar_indices, k_most_similar_vectors
+
+
+
+def top_k_cosine_similarity(query,data, k=5):
+    """
+    Find the top k elements in the data with the highest cosine similarity to the query.
+
+    :param data: A 2D array where each row is a vector.
+    :param query: A 1D array representing the query vector.
+    :param k: The number of top elements to return.
+    :return: Indices and values of the top k elements with highest cosine similarity.
+    """
+    # Check if k is larger than the dataset
+    if len(data) < k:
+        print("Error: k is larger than the size of the dataset.")
+        k = len(data)
+
+
+    # Compute cosine similarity
+    cosine_similarities = np.array([1 - cosine(query, vector) for vector in data])
+
+    # Get the indices of the top k elements
+    top_k_indices = np.argsort(cosine_similarities)[-k:]
+
+    # Get the top k elements
+    top_k_values = data[top_k_indices]
+
+    return top_k_indices, top_k_values
+
