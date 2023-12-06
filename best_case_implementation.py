@@ -126,15 +126,24 @@ class VecDBBest:
 
         # index_result_3= self.read_multiple_records_by_id(result_3)
         index_result_1= self.read_multiple_records_by_id(result_1)
+        scores = []
+        for row in index_result_1.values():
+            id_value = row['id']
+            embed_values = row['embed']
+            score = self._cal_score(query, embed_values)
+            scores.append((score, id_value))
+        scores = sorted(scores, reverse=True)[:top_k]
+        return [s[1] for s in scores]
 
         # level3_res_vectors=np.array([entry['embed'] for entry in index_result_3.values()])
-        level3_res_vectors=np.array([entry['embed'] for entry in index_result_1.values()])
+        # level3_res_vectors=np.array([entry['embed'] for entry in index_result_1.values()])
+        # print("last vector",level3_res_vectors)
 
         
-        top_result,_=top_k_cosine_similarity(query,level3_res_vectors,10000)
-        print("top k cosine similarity",top_result[:10])
-        top_result = np.argsort(level3_res_vectors.dot(query.T).T / (np.linalg.norm(level3_res_vectors, axis=1) * np.linalg.norm(query)), axis= 1).squeeze().tolist()[::-1]
-        return top_result
+        # top_result,_=top_k_cosine_similarity(query,level3_res_vectors,10000)
+        # print("top k cosine similarity",top_result[:10])
+        # top_result = np.argsort(level3_res_vectors.dot(query.T).T / (np.linalg.norm(level3_res_vectors, axis=1) * np.linalg.norm(query)), axis= 1).squeeze().tolist()[::-1]
+        # return top_result
         
         
         
@@ -146,3 +155,12 @@ class VecDBBest:
         # top_result = np.argsort(level3_res_vectors_rounded.dot(query_rounded.T).T / (np.linalg.norm(level3_res_vectors_rounded, axis=1) * np.linalg.norm(query_rounded)), axis=1).squeeze().tolist()[::-1]
 
         # return top_result[:10000] 
+
+    def _cal_score(self, vec1, vec2):
+        dot_product = np.dot(vec1, vec2)
+        norm_vec1 = np.linalg.norm(vec1)
+        norm_vec2 = np.linalg.norm(vec2)
+        cosine_similarity = dot_product / (norm_vec1 * norm_vec2)
+        return cosine_similarity
+        
+    
