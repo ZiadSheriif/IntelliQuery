@@ -19,41 +19,30 @@ class Result:
     db_ids: List[int]
     actual_ids: List[int]
 
-def run_queries(db1,db2, np_rows, top_k, num_runs):
-    results_worst = []
-    results_best = []
-    for _ in range(num_runs):
-        query = np.random.random((1,70))
+# def run_queries(db1,db2, np_rows, top_k, num_runs,delete=False):
+def run_queries(db, np_rows, top_k, num_runs, delete=False):
+    results = []
+    # results_worst = []
+    # results_best = []
+    for i in range(num_runs):
+        if delete:
+            query = np.random.random((1,70))
+            np.save( "./Database/q"+str(i)+'.npy',query)
+        else:
+            query = np.load( "./Database/q"+str(i)+'.npy')
 
-        # worst
         tic = time.time()
-        db_ids_worst = db1.retrive(query,top_k)
+        db_ids = db.retrive(query,top_k)
         toc = time.time()
-        run_time_worst = toc - tic
-        
-        # best
-        tic = time.time()
-        db_ids_best = db2.retrive(query,top_k)
-        toc = time.time()
-        run_time_best = toc - tic
-        print("Time taken by best: ",run_time_best)
-        print("Time taken by worst: ",run_time_worst)
-        tic = time.time()
+        run_time= toc - tic
+              
         actual_ids = np.argsort(np_rows.dot(query.T).T / (np.linalg.norm(np_rows, axis=1) * np.linalg.norm(query)), axis=1).squeeze().tolist()[::-1]
 
         toc = time.time()
         np_run_time = toc - tic
     
-        print("=======================================")
-        print("Best ids: ",db_ids_best)
-        print("Actual ids: ",actual_ids[:top_k])
-        print("Worst ids: ",db_ids_worst)
-        print("Intersect: ",set(actual_ids[:top_k]).intersection(set(db_ids_best)))
-        print("Intersection in top k indices in the best DB: ",find_indices(actual_ids[:top_k], db_ids_best))
-        print("=======================================")
-        results_worst.append(Result(run_time_worst, top_k, db_ids_worst, actual_ids))
-        results_best.append(Result(run_time_best, top_k, db_ids_best, actual_ids))
-    return results_worst, results_best
+        results.append(Result(run_time,top_k,db_ids,actual_ids))
+    return results
 
 def eval(results: List[Result]):
     # scores are negative. So getting 0 is the best score.
@@ -64,14 +53,18 @@ def eval(results: List[Result]):
         # case for retireving number not equal to top_k, socre will be the lowest
         if len(set(res.db_ids)) != res.top_k or len(res.db_ids) != res.top_k:
             scores.append( -1 * len(res.actual_ids) * res.top_k)
+            print('retrieving number not equal to top_k')
             continue
+
         score = 0
         for id in res.db_ids:
             try:
                 ind = res.actual_ids.index(id)
                 if ind > res.top_k * 3:
+                    print("not in top top_k*3")
                     score -= ind
             except:
+                print("not in ids")
                 score -= len(res.actual_ids)
         scores.append(score)
 
@@ -96,6 +89,28 @@ def find_indices(list1, list2):
     
     return indices
 
+    
+def compare_results_print(worst_res,best_res,top_k):
+        for i in range(len(worst_res)):
+            actual_ids=worst_res[i].actual_ids
+            db_ids_best=best_res[i].db_ids
+            db_ids_worst=worst_res[i].db_ids
+
+            run_time_worst=worst_res[i].run_time
+            run_time_best=best_res[i].run_time
+
+
+            print("=======================================")
+            print("Best ids: ",db_ids_best)
+            print("Actual ids: ",actual_ids[:top_k])
+            print("Worst ids: ",db_ids_worst)
+            print("Intersect: ",set(actual_ids[:top_k]).intersection(set(db_ids_best)))
+            print("Intersection in top k indices in the best DB: ",find_indices(actual_ids[:top_k], db_ids_best))
+            
+            print("Time taken by Query (Best): ",run_time_best)
+            print("Time taken by Query (Worst): ",run_time_worst)
+            print("=======================================")
+    
 if __name__ == "__main__":
     print("Hello Semantic LSH")
     
@@ -116,28 +131,32 @@ if __name__ == "__main__":
 
     # Mode
     parser = argparse.ArgumentParser(description='Description of your script')
-    parser.add_argument('-d','--debug', help='Description of the -d flag', action='store_true')
+    parser.add_argument('-d','--delete', help='Description of the -d flag', action='store_true')
     args = parser.parse_args()
 
-    # worst_db = VecDBWorst('./DataBase/data.csv',new_db=not args.debug)
-    worst_api = DataApi('./DataBase/data_worst.csv',True)
-    # best_db = VecDBBest('./DataBase/data.bin','./DataBase',new_db=not args.debug)
-    best_api = DataApi('./DataBase/data.bin', False,'./DataBase' )
+    # worst_db = VecDBWorst('./DataBase/data.csv',new_db=not args.delete)
+    worst_api = DataApi('./DataBase/data_worst.csv',True,'./DataBase',args.delete)
+    # best_db = VecDBBest('./DataBase/data.bin','./DataBase',new_db=not args.delete)
+    best_api = DataApi('./DataBase/data.bin', False,'./DataBase',args.delete)
 
-    if args.debug:
-        print("Debug")
+    if not args.delete:
+        print("Reading")
         # records_np = pd.read_csv('./DataBase/data.csv',header=None)
         # rows_without_first_element = np.array([row[1:].tolist() for _, row in records_np.iterrows()])
         # records_np=rows_without_first_element
+
+        records_database = np.array(best_api.get_first_k_records(10000))
+        records_np = extract_embeds_array(records_database)
+        records_dict = records_database
+        _len = len(records_np)
     else:
+        # New
 
         # records_database = np.array(best_api.get_first_k_records(10000))      
         print("Generating data files")
         records_np = np.random.random((number_of_records, number_of_features))
         # records_np = extract_embeds_array(records_database)
 
-        # records_dict = [{"id": i, "embed": list(row)} for i, row in enumerate(records_np)]
-        
         records_dict = [{"id": i, "embed": list(row)} for i, row in enumerate(records_np)]
         # records_dict = records_database
         _len = len(records_np)
@@ -145,18 +164,21 @@ if __name__ == "__main__":
         worst_api.insert_records(records_dict)
         best_api.insert_records_binary(records_dict)
 
-    # query = np.array([best_api.get_multiple_records_by_ids([200])[200]['embed']])
-    # print(best_api.get_multiple_records_by_ids([200])[200]['embed'])
-    # print(query)
+ 
+    # Worst
+    res_worst = run_queries(worst_api, records_np, top_k, number_of_queries,args.delete)
+    # Best
+    res_best = run_queries(best_api, records_np, top_k, number_of_queries,False)
 
-    # res = run_queries(worst_api, records_np, 5, 3)
-    # print("Worst:",eval(res))
+    compare_results_print(res_worst,res_best,top_k)
+    print("Worst:",eval(res_worst))
+    print("Best:",eval(res_best))
 
     # res = run_queries(best_api, records_np, 5, 3)
     # print("Best:",eval(res))
-    results_worst, results_best = run_queries(worst_api,best_api, records_np, top_k, number_of_queries)
-    print("Worst:",eval(results_worst))
-    print("Best:",eval(results_best))
+    # results_worst, results_best = run_queries(worst_api,best_api, records_np, top_k, number_of_queries)
+    # print("Worst:",eval(results_worst))
+    # print("Best:",eval(results_best))
 
     # records_np = np.concatenate([records_np, np.random.random((90000, 70))])
     # records_dict = [{"id": i + _len, "embed": list(row)} for i, row in enumerate(records_np[_len:])]
@@ -192,5 +214,3 @@ if __name__ == "__main__":
     # db.insert_records(records_dict)
     # res = run_queries(db, records_np, 5, 10)
     # eval(res)
-
-    
