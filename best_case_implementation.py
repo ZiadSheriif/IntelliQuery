@@ -72,7 +72,7 @@ class VecDBBest:
                 records.append(record)
             return records
 
-    def _build_index(self, Level_1_nbits=1, Level_2_nbits=3, Level_3_nbits=3)-> None:
+    def _build_index(self, Level_1_nbits=6, Level_2_nbits=3, Level_3_nbits=3)-> None:
     
         '''
         Build the Index
@@ -81,9 +81,8 @@ class VecDBBest:
         
         # Layer 1 Indexing
         level_1_in = self.get_top_k_records(top_k_records)
-        # print("First record: ",level_1_in[0])
         self.level_1_planes = LSH_index(data=level_1_in, nbits=Level_1_nbits, index_path=self.database_path + "/Level1")
-        return
+        
         # Layer 2 Indexing
         self.level_2_planes = {}
         for file_name in os.listdir(self.database_path + "/Level1"):
@@ -113,48 +112,31 @@ class VecDBBest:
         '''
         bucket_1,result_1 = semantic_query_lsh(query, self.level_1_planes, self.database_path + "/Level1")
         print("length of first bucket",result_1.shape)
-        print("Length of unique elements",len(np.unique(result_1)))
-        # print("Query",query)
-        # print("Np rows",np_rows)
         
-
         # Retrieve from Level 2
-        # bucket_2,result_2 = semantic_query_lsh(query, self.level_2_planes[bucket_1], self.database_path + "/Level2/"+bucket_1)
+        bucket_2,result_2 = semantic_query_lsh(query, self.level_2_planes[bucket_1], self.database_path + "/Level2/"+bucket_1)
+        print("length of second bucket",result_2.shape)
 
         # Retrieve from Level 3
-        # bucket_3,result_3 = semantic_query_lsh(query, self.level_3_planes[bucket_1][bucket_2], self.database_path + "/Level3/"+bucket_1+'/'+bucket_2)
-
-        # index_result_3= self.read_multiple_records_by_id(result_3)
-        index_result_1= self.read_multiple_records_by_id(result_1)
+        bucket_3,result_3 = semantic_query_lsh(query, self.level_3_planes[bucket_1][bucket_2], self.database_path + "/Level3/"+bucket_1+'/'+bucket_2)
+        print("length of third bucket",result_3.shape)
+        
+        
+        # Retrieve from Data Base the Embeddings of the Vectors
+        final_result= self.read_multiple_records_by_id(result_3)
+        
+        # Calculate the Cosine Similarity between the Query and the Vectors
         scores = []
-        for row in index_result_1.values():
+        for row in final_result.values():
             id_value = row['id']
             embed_values = row['embed']
             score = self._cal_score(query, embed_values)
             scores.append((score, id_value))
         scores = sorted(scores, reverse=True)[:top_k]
         return [s[1] for s in scores]
-
-        # level3_res_vectors=np.array([entry['embed'] for entry in index_result_3.values()])
-        # level3_res_vectors=np.array([entry['embed'] for entry in index_result_1.values()])
-        # print("last vector",level3_res_vectors)
-
-        
-        # top_result,_=top_k_cosine_similarity(query,level3_res_vectors,10000)
-        # print("top k cosine similarity",top_result[:10])
-        # top_result = np.argsort(level3_res_vectors.dot(query.T).T / (np.linalg.norm(level3_res_vectors, axis=1) * np.linalg.norm(query)), axis= 1).squeeze().tolist()[::-1]
-        # return top_result
         
         
         
-        # Round the elements in the query vector and level3_res_vectors to 5 decimal places
-        # query_rounded = np.round(query, decimals=8)
-        # level3_res_vectors_rounded = np.round(np_rows, decimals=8)
-
-        # Compute the cosine similarity using the rounded values
-        # top_result = np.argsort(level3_res_vectors_rounded.dot(query_rounded.T).T / (np.linalg.norm(level3_res_vectors_rounded, axis=1) * np.linalg.norm(query_rounded)), axis=1).squeeze().tolist()[::-1]
-
-        # return top_result[:10000] 
 
     def _cal_score(self, vec1, vec2):
         dot_product = np.dot(vec1, vec2)

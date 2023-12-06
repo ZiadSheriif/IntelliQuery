@@ -5,13 +5,12 @@ import argparse
 from utils import extract_embeds_array
 import pandas as pd
 from api import DataApi
-
+import os
 import time
 from dataclasses import dataclass
 from typing import List
 
 AVG_OVERX_ROWS = 1
-DECIMALS = 8
 
 @dataclass
 class Result:
@@ -25,8 +24,6 @@ def run_queries(db1,db2, np_rows, top_k, num_runs):
     results_best = []
     for _ in range(num_runs):
         query = np.random.random((1,70))
-        # query_rounded = np.round(query, decimals=DECIMALS)
-        # np_rows_rounded = np.round(np_rows, decimals=DECIMALS)
 
         # worst
         tic = time.time()
@@ -47,7 +44,7 @@ def run_queries(db1,db2, np_rows, top_k, num_runs):
         np_run_time = toc - tic
     
         print("=======================================")
-        print("Best ids: ",db_ids_best[:top_k])
+        print("Best ids: ",db_ids_best)
         print("Actual ids: ",actual_ids[:top_k])
         print("Worst ids: ",db_ids_worst)
         print("Intersect: ",set(actual_ids[:top_k]).intersection(set(db_ids_best)))
@@ -99,7 +96,12 @@ def find_indices(list1, list2):
     return indices
 
 if __name__ == "__main__":
-    print("Hello")
+    print("Hello Semantic LSH")
+    
+    
+    folder_name = "DataBase"
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
 
     # Mode
     parser = argparse.ArgumentParser(description='Description of your script')
