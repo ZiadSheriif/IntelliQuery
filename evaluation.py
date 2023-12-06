@@ -98,6 +98,16 @@ def find_indices(list1, list2):
 if __name__ == "__main__":
     print("Hello Semantic LSH")
     
+    number_of_records = 100000
+    number_of_features = 70
+    number_of_queries = 5
+    top_k = 10
+    print("******************************""")
+    print("Number of records: ",number_of_records)
+    print("Number of queries: ",number_of_queries)
+    print("Top k: ",top_k)
+    print("******************************""")
+    
     
     folder_name = "DataBase"
     if not os.path.exists(folder_name):
@@ -121,9 +131,8 @@ if __name__ == "__main__":
     else:
 
         # records_database = np.array(best_api.get_first_k_records(10000))
-        print("Generating data file")
-
-        records_np = np.random.random((10000, 70))
+        print("Generating data files")
+        records_np = np.random.random((number_of_records, number_of_features))
         # records_np = extract_embeds_array(records_database)
 
         # records_dict = [{"id": i, "embed": list(row)} for i, row in enumerate(records_np)]
@@ -144,7 +153,7 @@ if __name__ == "__main__":
 
     # res = run_queries(best_api, records_np, 5, 3)
     # print("Best:",eval(res))
-    results_worst, results_best = run_queries(worst_api,best_api, records_np, 10, AVG_OVERX_ROWS)
+    results_worst, results_best = run_queries(worst_api,best_api, records_np, top_k, number_of_queries)
     print("Worst:",eval(results_worst))
     print("Best:",eval(results_best))
 

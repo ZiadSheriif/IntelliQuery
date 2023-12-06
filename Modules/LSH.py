@@ -109,7 +109,8 @@ def semantic_query_lsh(query, plane_norms, index_path):
     list_buckets = []
     for filename, content in result.items():
         list_buckets.append(list(map(int, filename[:-4])))
-    min_hamming_buckets = get_top_k_hamming_distances(query_dot, list_buckets, 5)
+    number_of_neighbours = 6
+    min_hamming_buckets = get_top_k_hamming_distances(query_dot, list_buckets, number_of_neighbours)
     index_result =[]
     for (bucket, hamming_distance) in min_hamming_buckets:
         file_path = os.path.join(index_path, "".join(map(str,bucket)) + ".txt")

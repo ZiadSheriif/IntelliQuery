@@ -77,7 +77,7 @@ class VecDBBest:
         '''
         Build the Index
         '''
-        top_k_records = 10000
+        top_k_records = 100000
         
         # Layer 1 Indexing
         level_1_in = self.get_top_k_records(top_k_records)
@@ -110,6 +110,8 @@ class VecDBBest:
 
         return:  list of the top_k similar vectors Ordered by Cosine Similarity
         '''
+        
+        # Retrieve from Level 1
         bucket_1,result_1 = semantic_query_lsh(query, self.level_1_planes, self.database_path + "/Level1")
         print("length of first bucket",result_1.shape)
         
