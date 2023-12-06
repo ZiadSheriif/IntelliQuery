@@ -111,6 +111,8 @@ if __name__ == "__main__":
     
     
     folder_name = "DataBase"
+    if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
 
     # Mode
     parser = argparse.ArgumentParser(description='Description of your script')
@@ -129,9 +131,7 @@ if __name__ == "__main__":
         # records_np=rows_without_first_element
     else:
 
-        # records_database = np.array(best_api.get_first_k_records(10000))
-        if not os.path.exists(folder_name):
-            os.makedirs(folder_name)
+        # records_database = np.array(best_api.get_first_k_records(10000))      
         print("Generating data files")
         records_np = np.random.random((number_of_records, number_of_features))
         # records_np = extract_embeds_array(records_database)
