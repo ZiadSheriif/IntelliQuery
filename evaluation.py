@@ -36,7 +36,8 @@ def run_queries(db1,db2, np_rows, top_k, num_runs):
         db_ids_best = db2.retrive(query,top_k)
         toc = time.time()
         run_time_best = toc - tic
-        
+        print("Time taken by best: ",run_time_best)
+        print("Time taken by worst: ",run_time_worst)
         tic = time.time()
         actual_ids = np.argsort(np_rows.dot(query.T).T / (np.linalg.norm(np_rows, axis=1) * np.linalg.norm(query)), axis=1).squeeze().tolist()[::-1]
 
@@ -110,8 +111,6 @@ if __name__ == "__main__":
     
     
     folder_name = "DataBase"
-    if not os.path.exists(folder_name):
-        os.makedirs(folder_name)
 
     # Mode
     parser = argparse.ArgumentParser(description='Description of your script')
@@ -131,6 +130,8 @@ if __name__ == "__main__":
     else:
 
         # records_database = np.array(best_api.get_first_k_records(10000))
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
         print("Generating data files")
         records_np = np.random.random((number_of_records, number_of_features))
         # records_np = extract_embeds_array(records_database)

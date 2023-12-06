@@ -72,7 +72,7 @@ class VecDBBest:
                 records.append(record)
             return records
 
-    def _build_index(self, Level_1_nbits=6, Level_2_nbits=3, Level_3_nbits=3)-> None:
+    def _build_index(self, Level_1_nbits=7, Level_2_nbits=3, Level_3_nbits=3)-> None:
     
         '''
         Build the Index
@@ -82,7 +82,7 @@ class VecDBBest:
         # Layer 1 Indexing
         level_1_in = self.get_top_k_records(top_k_records)
         self.level_1_planes = LSH_index(data=level_1_in, nbits=Level_1_nbits, index_path=self.database_path + "/Level1")
-        
+        # return
         # Layer 2 Indexing
         self.level_2_planes = {}
         for file_name in os.listdir(self.database_path + "/Level1"):
@@ -91,7 +91,7 @@ class VecDBBest:
                 read_data_2 = np.loadtxt(file_path, dtype=int, ndmin=1)
                 level_2_in = self.read_multiple_records_by_id(read_data_2)
                 self.level_2_planes[file_name[:-4]] = LSH_index(data=level_2_in.values(), nbits=Level_2_nbits, index_path=self.database_path + "/Level2/" + file_name[:-4])
-
+        return 
         # Layer 3 Indexing
         self.level_3_planes = {}
         for folder_name in os.listdir(self.database_path + "/Level2"):
@@ -110,22 +110,35 @@ class VecDBBest:
 
         return:  list of the top_k similar vectors Ordered by Cosine Similarity
         '''
-        
+        #TODO read planes from file
+        # with open(os.path.join("Database", "plane_norms.txt"), "r") as file:
+        #         plane_norms = np.loadtxt(file, dtype=float, ndmin=2)
+           
+        # print("length of first bucket",plane_norms[0].shape)
+        # print("length of second bucket",plane_norms[1].shape)
+        # print("length of third bucket",plane_norms[2].shape)
+        # print("Value of first bucket",plane_norms[0])
+        # self.level_1_planes = np.array(plane_norms[0])
+        # self.level_2_planes = np.array(plane_norms[1])
+        # self.level_3_planes =np.array(plane_norms[2])
+            
+            
+            
         # Retrieve from Level 1
-        bucket_1,result_1 = semantic_query_lsh(query, self.level_1_planes, self.database_path + "/Level1")
-        print("length of first bucket",result_1.shape)
+        bucket_1,result = semantic_query_lsh(query, self.level_1_planes, self.database_path + "/Level1")
+        print("length of first bucket",result.shape)
         
         # Retrieve from Level 2
-        bucket_2,result_2 = semantic_query_lsh(query, self.level_2_planes[bucket_1], self.database_path + "/Level2/"+bucket_1)
-        print("length of second bucket",result_2.shape)
+        bucket_2,result = semantic_query_lsh(query, self.level_2_planes[bucket_1], self.database_path + "/Level2/"+bucket_1)
+        print("length of second bucket",result.shape)
 
         # Retrieve from Level 3
-        bucket_3,result_3 = semantic_query_lsh(query, self.level_3_planes[bucket_1][bucket_2], self.database_path + "/Level3/"+bucket_1+'/'+bucket_2)
-        print("length of third bucket",result_3.shape)
+        # bucket_3,result = semantic_query_lsh(query, self.level_3_planes[bucket_1][bucket_2], self.database_path + "/Level3/"+bucket_1+'/'+bucket_2)
+        # print("length of third bucket",result.shape)
         
         
         # Retrieve from Data Base the Embeddings of the Vectors
-        final_result= self.read_multiple_records_by_id(result_3)
+        final_result= self.read_multiple_records_by_id(result)
         
         # Calculate the Cosine Similarity between the Query and the Vectors
         scores = []
