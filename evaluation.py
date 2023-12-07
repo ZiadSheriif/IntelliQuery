@@ -61,10 +61,10 @@ def eval(results: List[Result]):
             try:
                 ind = res.actual_ids.index(id)
                 if ind > res.top_k * 3:
-                    print("not in top top_k*3")
+                    # print("not in top top_k*3")
                     score -= ind
             except:
-                print("not in ids")
+                # print("not in ids")
                 score -= len(res.actual_ids)
         scores.append(score)
 
@@ -145,7 +145,7 @@ if __name__ == "__main__":
         # rows_without_first_element = np.array([row[1:].tolist() for _, row in records_np.iterrows()])
         # records_np=rows_without_first_element
 
-        records_database = np.array(best_api.get_first_k_records(10000))
+        records_database = np.array(best_api.get_first_k_records(number_of_records))
         records_np = extract_embeds_array(records_database)
         records_dict = records_database
         _len = len(records_np)
