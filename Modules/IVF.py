@@ -1,5 +1,8 @@
 import numpy as np
 from sklearn.cluster import KMeans
+import time
+from scipy.spatial.distance import cosine
+
 
 
 class InvertedFileSystem:
@@ -30,27 +33,39 @@ class InvertedFileSystem:
         return [candidates[i] for i in nearest_indices]
 
 
-def brute_force_search(query_vector, data, top_k=5):
-    # Calculate distances from the query vector to all vectors in the dataset
-    distances = np.linalg.norm(data - query_vector, axis=1)
+def brute_force_cosine_similarity(query_vector, data, top_k=5):
+    # Calculate cosine similarities for each vector in the dataset
+    similarities = [1 - cosine(query_vector, vector) for vector in data]
 
-    # Get the indices of the top k nearest neighbors
-    nearest_indices = np.argsort(distances)[:top_k]
-    return nearest_indices
+    # Get the indices of the top k most similar vectors
+    nearest_indices = np.argsort(similarities)[-top_k:]
+
+    # Return the indices and their cosine similarities
+    top_k_cosine_similarities = [idx for idx in reversed(nearest_indices)]
+    return top_k_cosine_similarities
 
 
 # !testing IVFFF
-data = np.random.rand(100000, 70)
+data = np.random.rand(1000, 70)
 ivf = InvertedFileSystem(n_clusters=3)
 ivf.build_index(data)
 
 query_vector = np.random.rand(70)
 
-# Perform brute force search
-brute_force_results = brute_force_search(query_vector, data, top_k=10)
+# Timing brute force search
+start_time = time.time()
+brute_force_results = brute_force_cosine_similarity(query_vector, data, top_k=10)
+brute_force_time = time.time() - start_time
 print("Brute force top k: ", brute_force_results)
+print("Brute force time: ", brute_force_time)
+
+print("==========================================")
+# Timing IVF query
+start_time = time.time()
 top_k_results = ivf.query(query_vector, top_k=10)
-print("top k: ", top_k_results)
+ivf_time = time.time() - start_time
+print("IVF top k: ", top_k_results)
+print("IVF time: ", ivf_time)
 
 
 # Get intersection
