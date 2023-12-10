@@ -84,7 +84,7 @@ class VecDBBest:
         level_1_in = self.get_top_k_records(top_k_records)
         level_1_planes = LSH_index(data=level_1_in, nbits=Level_1_nbits, index_path=self.database_path + "/Level1")
         np.save(self.database_path + "/Level1/"+'metadata.npy',level_1_planes)
-
+        return
         # Layer 2 Indexing
         for file_name in os.listdir(self.database_path + "/Level1"):
             file_path = os.path.join(self.database_path + "/Level1", file_name)
@@ -134,13 +134,13 @@ class VecDBBest:
         if len(result) < top_k:
             print('level 1 smaller than top_k')
         
-        # Retrieve from Level 2
-        level_2_planes = np.load(self.database_path + "/Level2/"+bucket_1+'/metadata.npy')
-        bucket_2,result = semantic_query_lsh(query, level_2_planes, self.database_path + "/Level2/"+bucket_1)
-        print("length of second bucket",result.shape)
+        # # Retrieve from Level 2
+        # level_2_planes = np.load(self.database_path + "/Level2/"+bucket_1+'/metadata.npy')
+        # bucket_2,result = semantic_query_lsh(query, level_2_planes, self.database_path + "/Level2/"+bucket_1)
+        # print("length of second bucket",result.shape)
 
-        if len(result) < top_k:
-            print('level 2 smaller than top_k')
+        # if len(result) < top_k:
+        #     print('level 2 smaller than top_k')
 
         # Retrieve from Level 3
         # level_3_planes = np.load(self.database_path + "/Level3/"+bucket_1+'/'+bucket_2+'/metadata.npy')
