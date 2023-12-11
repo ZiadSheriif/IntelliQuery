@@ -1,6 +1,6 @@
 from typing import Dict, List, Annotated
 import numpy as np
-from utils import empty_folder,read_binary_file_chunk
+from utils import empty_folder,read_binary_file_chunk,math
 from Modules.LSH import *
 import struct
 
@@ -80,7 +80,6 @@ class VecDBBest:
         '''
         Build the Index
         '''
-        print('Hello Basma <3')
         print("Building Index ..........")
 
 
@@ -88,8 +87,23 @@ class VecDBBest:
         kmeans = MiniBatchKMeans(n_clusters=3, random_state=42)
 
         # Read Data from File chunk by chunk
-        chunk_size=10
-        data_chunk=read_binary_file_chunk(file_path=self.file_path,record_format=f"I{70}f",start_index=998,chunk_size=chunk_size)
+        chunk_size=100
+        file_size = os.path.getsize(self.file_path)
+        record_size=struct.calcsize(f"I{70}f")
+        n_records=file_size/record_size
+        no_chunks=math.ceil(n_records/chunk_size)
+
+        print("***********Reading File in build index()*****************")
+        print("data.bin file size (R=284 Byte): ",file_size)
+        print("n_records",n_records)
+        print("chuck size",chunk_size)
+        print("No of Chunks",no_chunks)
+        for i in range(no_chunks):
+            print("Reading Chunk",i,"....")
+            data_chunk=read_binary_file_chunk(file_path=self.file_path,record_format=f"I{70}f",start_index=i*chunk_size,chunk_size=chunk_size)
+            # if(data_chunk is None):
+            #     # If out of index but not needed here
+            #     break
 
 
         return 

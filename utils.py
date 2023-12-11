@@ -1,6 +1,7 @@
 import numpy as np
 import shutil
 import os
+import math
 
 import struct
 
@@ -33,9 +34,8 @@ def read_binary_file_chunk(file_path,record_format,start_index,chunk_size=10):
             print("Out Of File Index 🔥🔥")
             return None
 
-        file_size = os.path.getsize(file_path)
+        # file_size = os.path.getsize(file_path)
         # print("Current file position:", fin.tell())
-        print("data.bin file size (284 Byte)",file_size)
         # print("File size:", file_size,"record_format",record_format,"record_size",record_size,"chunk_data len",len(chunk_data))
 
         # Unpack Data
