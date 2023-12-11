@@ -77,14 +77,14 @@ class VecDBBest:
         '''
         Build the Index
         '''
-        top_k_records = 100000
+        top_k_records = 1000000
         
         # Layer 1 Indexing
         # TODO: Here we are reading the whole file: Change later
         level_1_in = self.get_top_k_records(top_k_records)
         level_1_planes = LSH_index(data=level_1_in, nbits=Level_1_nbits, index_path=self.database_path + "/Level1")
         np.save(self.database_path + "/Level1/"+'metadata.npy',level_1_planes)
-        return
+        # return
         # Layer 2 Indexing
         for file_name in os.listdir(self.database_path + "/Level1"):
             file_path = os.path.join(self.database_path + "/Level1", file_name)
@@ -94,7 +94,7 @@ class VecDBBest:
                 level_2_planes = LSH_index(data=level_2_in.values(), nbits=Level_2_nbits, index_path=self.database_path + "/Level2/" + file_name[:-4])
                 np.save(self.database_path + "/Level2/" + file_name[:-4]+'/metadata.npy',level_2_planes)
       
-        return
+        # return
         # Layer 3 Indexing
         for folder_name in os.listdir(self.database_path + "/Level2"):
             folder_path = os.path.join(self.database_path + "/Level2", folder_name)
@@ -112,20 +112,7 @@ class VecDBBest:
 
         return:  list of the top_k similar vectors Ordered by Cosine Similarity
         '''
-        #TODO read planes from file
-        # with open(os.path.join("Database", "plane_norms.txt"), "r") as file:
-        #         plane_norms = np.loadtxt(file, dtype=float, ndmin=2)
-           
-        # print("length of first bucket",plane_norms[0].shape)
-        # print("length of second bucket",plane_norms[1].shape)
-        # print("length of third bucket",plane_norms[2].shape)
-        # print("Value of first bucket",plane_norms[0])
-        # self.level_1_planes = np.array(plane_norms[0])
-        # self.level_2_planes = np.array(plane_norms[1])
-        # self.level_3_planes =np.array(plane_norms[2])
-            
-            
-            
+        
         # Retrieve from Level 1
         level_1_planes = np.load(self.database_path + "/Level1"+'/metadata.npy')
         bucket_1,result = semantic_query_lsh(query, level_1_planes, self.database_path + "/Level1")
@@ -134,18 +121,18 @@ class VecDBBest:
         if len(result) < top_k:
             print('level 1 smaller than top_k')
         
-        # # Retrieve from Level 2
-        # level_2_planes = np.load(self.database_path + "/Level2/"+bucket_1+'/metadata.npy')
-        # bucket_2,result = semantic_query_lsh(query, level_2_planes, self.database_path + "/Level2/"+bucket_1)
-        # print("length of second bucket",result.shape)
+        # Retrieve from Level 2
+        level_2_planes = np.load(self.database_path + "/Level2/"+bucket_1+'/metadata.npy')
+        bucket_2,result = semantic_query_lsh(query, level_2_planes, self.database_path + "/Level2/"+bucket_1)
+        print("length of second bucket",result.shape)
 
-        # if len(result) < top_k:
-        #     print('level 2 smaller than top_k')
+        if len(result) < top_k:
+            print('level 2 smaller than top_k')
 
         # Retrieve from Level 3
-        # level_3_planes = np.load(self.database_path + "/Level3/"+bucket_1+'/'+bucket_2+'/metadata.npy')
-        # bucket_3,result = semantic_query_lsh(query, level_3_planes, self.database_path + "/Level3/"+bucket_1+'/'+bucket_2)
-        # print("length of third bucket",result.shape)
+        level_3_planes = np.load(self.database_path + "/Level3/"+bucket_1+'/'+bucket_2+'/metadata.npy')
+        bucket_3,result = semantic_query_lsh(query, level_3_planes, self.database_path + "/Level3/"+bucket_1+'/'+bucket_2)
+        print("length of third bucket",result.shape)
 
         # if len(result) < top_k:
         #     print('level 3 smaller than top_k')

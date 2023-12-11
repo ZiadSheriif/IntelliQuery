@@ -23,9 +23,6 @@ def LSH_index(data, nbits, index_path, d=70):
 
     plane_norms = np.random.rand(nbits, d) - 0.5
     
-    #TODO  write plane norms to file
-    # with open(os.path.join("Database", "plane_norms.txt"), "a") as file:
-    #     np.savetxt(file, plane_norms)
     
     # If index Folder Doesn't Exist just Create it :D
     if not os.path.exists(index_path):
