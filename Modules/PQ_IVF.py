@@ -211,9 +211,10 @@ class PQ_IVF:
             return
   
 
-    def semantic_query_pq_ivf(self,query,top_k):
+    def semantic_query_pq_ivf(self,query,top_k,n_regions):
         '''
         top_k: nearest 
+        n_regions:no of regions to be candidates of the clusters
         '''
         # Use Centroid TODO Check if we need to not save just read
         print("semantic_query_pq_ivf ()")
@@ -223,13 +224,13 @@ class PQ_IVF:
         # ################################################### Step(1) for query ,the k nearest centroids of Voronoi partitions are found ###############################################################
         # ################################################### ########################################################################## ###############################################################
         
-        assert self.K_means_centroids.shape[0]>top_k,"Top K must be less than the no of regions [Check Medium]"
+        assert self.K_means_centroids.shape[0]>n_regions,"Top K must be less than the no of regions [Check Medium]"
         # Calculate distances using Euclidean distance (you can also use cosine similarity) [TODO check]
         distances = np.linalg.norm(self.K_means_centroids - query, axis=1)
         # self.K_means_centroids.predict(data)
 
         # Get indices of the nearest vectors
-        nearest_regions= np.argsort(distances)[:top_k]
+        nearest_regions= np.argsort(distances)[:n_regions]
 
         # Get the nearest centroid
         nearest_centroids = self.K_means_centroids[nearest_regions]

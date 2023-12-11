@@ -136,7 +136,7 @@ class VecDBBest:
         '''
         
         print(f"Retrieving top {top_k} ..........")
-        final_result=self.level1.semantic_query_pq_ivf(query,top_k=top_k)
+        final_result=self.level1.semantic_query_pq_ivf(query,top_k=top_k,n_regions=2)
 
 
         print("-------------------------Retrieval Done ---------------------")
