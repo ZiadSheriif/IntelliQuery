@@ -3,6 +3,7 @@ import numpy as np
 from utils import empty_folder
 from Modules.LSH import *
 import struct
+import time
 
 class VecDBBest:
     def __init__(self,file_path="./DataBase/data.bin", database_path = "./DataBase", new_db = True) -> None:
@@ -72,19 +73,26 @@ class VecDBBest:
                 records.append(record)
             return records
 
-    def _build_index(self,Level_1_nbits=7, Level_2_nbits=3, Level_3_nbits=3)-> None:
+    def _build_index(self,Level_1_nbits=7, Level_2_nbits=5, Level_3_nbits=3,Level_4_nbits=3)-> None:
     
         '''
         Build the Index
         '''
         top_k_records = 1000000
         
+        # measure the time
+        start = time.time() 
+        
         # Layer 1 Indexing
         # TODO: Here we are reading the whole file: Change later
         level_1_in = self.get_top_k_records(top_k_records)
         level_1_planes = LSH_index(data=level_1_in, nbits=Level_1_nbits, index_path=self.database_path + "/Level1")
         np.save(self.database_path + "/Level1/"+'metadata.npy',level_1_planes)
+        print("Layer 1 Finished")
         # return
+        
+        
+        
         # Layer 2 Indexing
         for file_name in os.listdir(self.database_path + "/Level1"):
             file_path = os.path.join(self.database_path + "/Level1", file_name)
@@ -93,8 +101,10 @@ class VecDBBest:
                 level_2_in = self.read_multiple_records_by_id(read_data_2)
                 level_2_planes = LSH_index(data=level_2_in.values(), nbits=Level_2_nbits, index_path=self.database_path + "/Level2/" + file_name[:-4])
                 np.save(self.database_path + "/Level2/" + file_name[:-4]+'/metadata.npy',level_2_planes)
-      
+        print("Layer 2 Finished")
         # return
+        
+        
         # Layer 3 Indexing
         for folder_name in os.listdir(self.database_path + "/Level2"):
             folder_path = os.path.join(self.database_path + "/Level2", folder_name)
@@ -105,7 +115,27 @@ class VecDBBest:
                     level_3_in = self.read_multiple_records_by_id(read_data_3)
                     level_3_planes = LSH_index(data=level_3_in.values(), nbits=Level_3_nbits, index_path=self.database_path + "/Level3/" + folder_name + '/' + file_name[:-4])
                     np.save(self.database_path + "/Level3/" + folder_name + '/' + file_name[:-4]+'/metadata.npy',level_3_planes)
-    
+        print("Layer 3 Finished")
+        
+        
+        # Layer 4 Indexing
+        for folder_name in os.listdir(self.database_path + "/Level3"):
+            folder_path = os.path.join(self.database_path + "/Level3", folder_name)
+            for folder_name_2 in os.listdir(folder_path):
+                folder_path_2 = os.path.join(folder_path, folder_name_2)
+                for file_name in os.listdir(folder_path_2):
+                    file_path = os.path.join(folder_path_2, file_name)
+                    if os.path.isfile(file_path)  and file_name.lower().endswith(".txt"):
+                        read_data_4 = np.loadtxt(file_path, dtype=int, ndmin=1)
+                        level_4_in = self.read_multiple_records_by_id(read_data_4)
+                        level_4_planes = LSH_index(data=level_4_in.values(), nbits=Level_4_nbits, index_path=self.database_path + "/Level4/" + folder_name + '/' + folder_name_2 + '/' + file_name[:-4])
+                        np.save(self.database_path + "/Level4/" + folder_name + '/' + folder_name_2 + '/' + file_name[:-4]+'/metadata.npy',level_4_planes)
+        print("Layer 4 Finished")
+        
+        
+        # measure the time
+        end = time.time()
+        print("Time taken by Indexing: ",end - start)
     def retrive(self, query:Annotated[List[float], 70],top_k = 5)-> [int]:
         '''
         Get the top_k vectors similar to the Query
@@ -133,6 +163,11 @@ class VecDBBest:
         level_3_planes = np.load(self.database_path + "/Level3/"+bucket_1+'/'+bucket_2+'/metadata.npy')
         bucket_3,result = semantic_query_lsh(query, level_3_planes, self.database_path + "/Level3/"+bucket_1+'/'+bucket_2)
         print("length of third bucket",result.shape)
+        
+        # Retrieve from Level 4
+        level_4_planes = np.load(self.database_path + "/Level4/"+bucket_1+'/'+bucket_2+'/'+bucket_3+'/metadata.npy')
+        bucket_4,result = semantic_query_lsh(query, level_4_planes, self.database_path + "/Level4/"+bucket_1+'/'+bucket_2+'/'+bucket_3)
+        print("length of fourth bucket",result.shape)
 
         # if len(result) < top_k:
         #     print('level 3 smaller than top_k')
