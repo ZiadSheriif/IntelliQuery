@@ -24,6 +24,8 @@ class VecDBBest:
             with open(self.file_path, "w") as fout:
                 # if you need to add any head to the file
                 pass
+
+        self.level1=None
         
     def calculate_offset(self, record_id: int) -> int:
         # Calculate the offset for a given record ID
@@ -90,11 +92,13 @@ class VecDBBest:
 
         # PQ_IVF()
         PQ_IVF_Layer=PQ_IVF(file_path=self.file_path,chunk_size=10,K_means_n_clusters=3,K_means_max_iter=100,ivf_folder_path=self.database_path + "/Level1",pq_D_=10,pq_K_means_n_clusters=2)
+        self.level1=PQ_IVF_Layer
 
         # Indexing
         PQ_IVF_Layer.PQ_IVF_index()
 
 
+        print("-------------------------Indexing Done ---------------------")
         return 
         top_k_records = 100000
         # Layer 1 Indexing
@@ -130,6 +134,15 @@ class VecDBBest:
 
         return:  list of the top_k similar vectors Ordered by Cosine Similarity
         '''
+        
+        print(f"Retrieving top {top_k} ..........")
+        final_result=self.level1.semantic_query_pq_ivf(query,top_k=top_k)
+
+
+        print("-------------------------Retrieval Done ---------------------")
+        return final_result
+    
+
         #TODO read planes from file
         # with open(os.path.join("Database", "plane_norms.txt"), "r") as file:
         #         plane_norms = np.loadtxt(file, dtype=float, ndmin=2)

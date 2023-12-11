@@ -158,7 +158,7 @@ class PQ_IVF:
             # We have sub_vectors_kmeans   kmeans for each sub_vector for all clusters together
             ############################################
             for i,kmeans_obj in enumerate(sub_vectors_kmeans):
-                # print(kmeans_obj.cluster_centers_.shape) # dim self.pq_K_means_n_clusters * sub_vectors_size
+                # print(kmeans_obj.cluster_centers_.shape) # dim self.pq_K_means_n_clusters * sub_vectors_size #[TODO Check if need to save ]
                 np.save(self.ivf_folder_path+f'/sub_vec_{i}_kmeans.npy',kmeans_obj.cluster_centers_)
             
             # ############################################################### ###################################### ###############################################################
@@ -211,5 +211,110 @@ class PQ_IVF:
             return
   
 
-def semantic_query_pq_ivf(query):
-    pass
+    def semantic_query_pq_ivf(self,query,top_k):
+        '''
+        top_k: nearest 
+        '''
+        # Use Centroid TODO Check if we need to not save just read
+        print("semantic_query_pq_ivf ()")
+
+            
+        # ################################################### ########################################################################## ###############################################################
+        # ################################################### Step(1) for query ,the k nearest centroids of Voronoi partitions are found ###############################################################
+        # ################################################### ########################################################################## ###############################################################
+        
+        assert self.K_means_centroids.shape[0]>top_k,"Top K must be less than the no of regions [Check Medium]"
+        # Calculate distances using Euclidean distance (you can also use cosine similarity) [TODO check]
+        distances = np.linalg.norm(self.K_means_centroids - query, axis=1)
+        # self.K_means_centroids.predict(data)
+
+        # Get indices of the nearest vectors
+        nearest_regions= np.argsort(distances)[:top_k]
+
+        # Get the nearest centroid
+        nearest_centroids = self.K_means_centroids[nearest_regions]
+        # print("nearest_centroid",nearest_centroids.shape,nearest_centroids)
+
+
+             
+        # ################################################### ####################################################################### ###############################################################
+        # ################################################### Step(2) calculate query residual separately for every Voronoi partition ###############################################################
+        # ################################################### ####################################################################### ###############################################################
+        query_residual=np.empty((nearest_centroids.shape[0],70))
+        for i in range(nearest_centroids.shape[0]):
+            # For Every Separate Region
+            # Get Residual of query to region's centroid
+            query_residual[i]=nearest_centroids[i]-query
+            # print("query_residual",query_residual.shape,query_residual)
+
+
+        # ################################################### ##################################################################################### ###############################################################
+        # ################################################### Step(3) split the query residual is then split into sub_vectors& fet partial Distance ###############################################################
+        # ################################################### ##################################################################################### ###############################################################
+        # Get partial distances Matrix distance between Q sub_vectors and all centroids
+        partial_distances_region_i=np.empty((self.pq_K_means_n_clusters,self.pq_D_,nearest_centroids.shape[0])) # #clusters for the sub_vector*no of sub_vectors*no of regions
+        # partial_distances_region_i=np.zeros((self.pq_K_means_n_clusters,self.pq_D_,2)) # #clusters for the sub_vector*no of sub_vectors*no of regions
+
+        sub_vectors_size=70//self.pq_D_ # the Size of the sub_vector
+        for j,sub_vector_start_index in enumerate(range(0,70,sub_vectors_size)):
+            # Loop over each sub vector
+            # Read the Centroids for this sub_vector
+            sub_vector_centroids= np.load(self.ivf_folder_path+f'/sub_vec_{j}_kmeans.npy')
+            # print(sub_vector_centroids.shape) #self.pq_K_means_n_clusters * pq_D_
+            for region_i in range(nearest_centroids.shape[0]):
+                # For Each Region
+                # Compute distance from the query to all the centroids
+                distances = np.linalg.norm(sub_vector_centroids - query_residual[region_i,sub_vector_start_index:sub_vector_start_index+sub_vectors_size] , axis=1)
+                # print(distances)
+                # print(sub_vector_centroids.shape)
+                # print(query_residual.shape)
+                # print(distances.shape)
+                partial_distances_region_i[:,j,region_i]=distances
+        # print(partial_distances_region_i[:,:,0])
+        # print(partial_distances_region_i[:,:,1])
+
+
+        # ########################################### ####################################################################################################### ###############################################################
+        # ########################################### Step(4) Get approximate Distance between each candidate and the query using the PQ and partial distance ###############################################################
+        # ########################################### ####################################################################################################### ###############################################################
+        # top_k=np.ones() # TODO instead of sorting all of them just pick the largest k
+        scores=[]
+        for region_i,region in enumerate(nearest_regions):
+            # Every Region
+            file_size = os.path.getsize(self.ivf_folder_path+f'/residuals_{region}_pq.bin')
+            record_size=struct.calcsize(f"I{self.pq_D_}I")
+            n_records=file_size/record_size
+            no_chunks=math.ceil(n_records/self.chunk_size)
+            # print(region,n_records)
+
+            for i in range(no_chunks):
+                # Read the residual chunk by chunk
+                data_chunk=read_binary_file_chunk(file_path=self.ivf_folder_path+f'/residuals_{region}_pq.bin',record_format=f"I{self.pq_D_}I",start_index=i*self.chunk_size,chunk_size=self.chunk_size) #[{"id":,"embed":[PQ]}]
+                # print(data_chunk) #PQ of the elements in region
+                for entry in data_chunk:
+                        id,pq=entry['id'],entry['embed']
+                        # print(id,pq)
+                        # Slice elements based on the indices [Use arange ]
+                        partial_distance = partial_distances_region_i[pq, np.arange(partial_distances_region_i.shape[1]),region_i]
+                        
+                        # print(partial_distance)
+                        # partial_distance=partial_distances_region_i[pq,:,region_i]
+                        # print(partial_distance.shape)
+                        # print(partial_distance)
+
+                        
+                        # Computing distance from a query to database vector by using PQ code and distance table
+                        query_db_vector_distance= np.sqrt(np.sum((partial_distance)**2))
+                        # print("query_db_vector_distance",query_db_vector_distance)
+
+                        # Add this to the scores one
+                        scores.append((query_db_vector_distance, id))
+        
+        # ########################################### ##################### ###################################################
+        # ########################################### Step(5) Get nearest k ###################################################
+        # ########################################### ##################### ###################################################
+        # TODO Handle if less than top_k 
+        # here we assume that if two rows have the same score, return the lowest ID
+        scores = sorted(scores, reverse=True)[:top_k]
+
+        return [s[1] for s in scores] 

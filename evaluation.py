@@ -115,7 +115,7 @@ if __name__ == "__main__":
     number_of_records = 10
     number_of_features = 70
     number_of_queries = 1
-    top_k = 10
+    top_k = 2
     print("******************************""")
     print("Number of records: ",number_of_records)
     print("Number of queries: ",number_of_queries)
