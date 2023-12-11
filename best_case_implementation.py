@@ -91,7 +91,7 @@ class VecDBBest:
 
 
         # PQ_IVF()
-        PQ_IVF_Layer=PQ_IVF(file_path=self.file_path,chunk_size=10,K_means_n_clusters=3,K_means_max_iter=100,ivf_folder_path=self.database_path + "/Level1",pq_D_=10,pq_K_means_n_clusters=2)
+        PQ_IVF_Layer=PQ_IVF(file_path=self.file_path,chunk_size=200,K_means_n_clusters=4,K_means_max_iter=100,ivf_folder_path=self.database_path + "/Level1",pq_D_=10,pq_K_means_n_clusters=4)
         self.level1=PQ_IVF_Layer
 
         # Indexing

@@ -111,11 +111,11 @@ def compare_results_print(worst_res,best_res,top_k):
     
 if __name__ == "__main__":
     print("Hello Semantic LSH")
-    
-    number_of_records = 10
+
+    number_of_records = 10000
     number_of_features = 70
     number_of_queries = 1
-    top_k = 2
+    top_k = 10
     print("******************************""")
     print("Number of records: ",number_of_records)
     print("Number of queries: ",number_of_queries)
@@ -160,9 +160,9 @@ if __name__ == "__main__":
     # Best
     res_best = run_queries(best_api, records_np, top_k, number_of_queries,False)
 
-    # compare_results_print(res_worst,res_best,top_k)
-    # print("Worst:",eval(res_worst))
-    # print("Best:",eval(res_best))
+    compare_results_print(res_worst,res_best,top_k)
+    print("Worst:",eval(res_worst))
+    print("Best:",eval(res_best))
 
     # res = run_queries(best_api, records_np, 5, 3)
     # print("Best:",eval(res))

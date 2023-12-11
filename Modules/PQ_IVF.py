@@ -105,16 +105,16 @@ class PQ_IVF:
                     for i in range(len(region_ids)):
                         data = struct.pack(f"I{70}f", region_ids[i], *region_vectors[i])
                         fout.write(data)
+                        print("write in",f"residuals_{label}",region_ids[i])
 
 
             # Test Read residuals of region 0
             # data_chunk=read_binary_file_chunk(file_path=self.ivf_folder_path+f'/residuals_{0}.bin',record_format=f"I{70}f",start_index=0,chunk_size=500) #[{"id":,"embed":[]}]
 
 
-
-            # ############################################################### ########################################## ###############################################################
-            # ############################################################### Step(3):Getting Centroids for PQ Residuals ###############################################################
-            # ############################################################### ########################################## ###############################################################
+            ############################################################### ########################################## ###############################################################
+            ############################################################### Step(3):Getting Centroids for PQ Residuals ###############################################################
+            ############################################################### ########################################## ###############################################################
             sub_vectors_size=70//self.pq_D_ # the Size of the sub_vector
 
 
@@ -208,7 +208,7 @@ class PQ_IVF:
                             fout.write(data)
 
             
-            return
+        return
   
 
     def semantic_query_pq_ivf(self,query,top_k,n_regions):
@@ -224,7 +224,7 @@ class PQ_IVF:
         # ################################################### Step(1) for query ,the k nearest centroids of Voronoi partitions are found ###############################################################
         # ################################################### ########################################################################## ###############################################################
         
-        assert self.K_means_centroids.shape[0]>n_regions,"Top K must be less than the no of regions [Check Medium]"
+        assert self.K_means_centroids.shape[0]>n_regions,"n_regions K must be less than the no of regions [Check Medium]"
         # Calculate distances using Euclidean distance (you can also use cosine similarity) [TODO check]
         distances = np.linalg.norm(self.K_means_centroids - query, axis=1)
         # self.K_means_centroids.predict(data)
@@ -235,6 +235,23 @@ class PQ_IVF:
         # Get the nearest centroid
         nearest_centroids = self.K_means_centroids[nearest_regions]
         # print("nearest_centroid",nearest_centroids.shape,nearest_centroids)
+
+        # Read these Regions elements
+        temp=[]
+        for region in nearest_regions:
+            print("region.........",region)
+            file_size = os.path.getsize(self.ivf_folder_path+f'/residuals_{region}.bin')
+            record_size=struct.calcsize(f"I{70}f")
+            n_records=file_size/record_size
+            no_chunks=math.ceil(n_records/self.chunk_size)
+            print(region,n_records)
+
+            data_chunk=read_binary_file_chunk(file_path=self.ivf_folder_path+f'/residuals_{region}.bin',record_format=f"I{70}f",start_index=0,chunk_size=100000) #[{"id":,"embed":[PQ]}]
+            for entry in data_chunk:
+                id,pq=entry['id'],entry['embed']
+                temp.append(id)
+        print("1st step",temp)
+        return np.array(temp)
 
 
              
@@ -316,6 +333,7 @@ class PQ_IVF:
         # ########################################### ##################### ###################################################
         # TODO Handle if less than top_k 
         # here we assume that if two rows have the same score, return the lowest ID
+        print(sorted(scores, reverse=True),".HHHHHHHHHHHHHHHHHHHHHHHHHHH")
         scores = sorted(scores, reverse=True)[:top_k]
 
         return [s[1] for s in scores] 
