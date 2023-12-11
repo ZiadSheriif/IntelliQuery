@@ -1,11 +1,12 @@
 from typing import Dict, List, Annotated
 import numpy as np
-from utils import empty_folder,read_binary_file_chunk,math
+from utils import empty_folder,read_binary_file_chunk,math,extract_embeds_array
 from Modules.LSH import *
 import struct
 
 
-from sklearn.cluster import MiniBatchKMeans
+
+from Modules.PQ_IVF import *
 
 class VecDBBest:
     def __init__(self,file_path="./DataBase/data.bin", database_path = "./DataBase", new_db = True) -> None:
@@ -83,31 +84,14 @@ class VecDBBest:
         print("Building Index ..........")
 
 
-        # Initialize MiniBatchKMeans
-        kmeans = MiniBatchKMeans(n_clusters=3, random_state=42)
+        # PQ_IVF()
+        PQ_IVF_Layer=PQ_IVF(file_path=self.file_path,chunk_size=10,K_means_n_clusters=3,K_means_max_iter=100)
 
-        # Read Data from File chunk by chunk
-        chunk_size=100
-        file_size = os.path.getsize(self.file_path)
-        record_size=struct.calcsize(f"I{70}f")
-        n_records=file_size/record_size
-        no_chunks=math.ceil(n_records/chunk_size)
-
-        print("***********Reading File in build index()*****************")
-        print("data.bin file size (R=284 Byte): ",file_size)
-        print("n_records",n_records)
-        print("chuck size",chunk_size)
-        print("No of Chunks",no_chunks)
-        for i in range(no_chunks):
-            print("Reading Chunk",i,"....")
-            data_chunk=read_binary_file_chunk(file_path=self.file_path,record_format=f"I{70}f",start_index=i*chunk_size,chunk_size=chunk_size)
-            # if(data_chunk is None):
-            #     # If out of index but not needed here
-            #     break
+        # Indexing
+        PQ_IVF_Layer.PQ_IVF_index()
 
 
         return 
-        
         top_k_records = 100000
         # Layer 1 Indexing
         # TODO: Here we are reading the whole file: Change later

@@ -114,7 +114,7 @@ def compare_results_print(worst_res,best_res,top_k):
 if __name__ == "__main__":
     print("Hello Semantic LSH")
     
-    number_of_records = 1000
+    number_of_records = 10
     number_of_features = 70
     number_of_queries = 1
     top_k = 10
