@@ -83,9 +83,13 @@ class VecDBBest:
         '''
         print("Building Index ..........")
 
+        # If Level 1 Folder Doesn't Exist just Create it :D
+        if not os.path.exists(self.database_path + "/Level1"):
+            os.makedirs(self.database_path + "/Level1")
+
 
         # PQ_IVF()
-        PQ_IVF_Layer=PQ_IVF(file_path=self.file_path,chunk_size=10,K_means_n_clusters=3,K_means_max_iter=100)
+        PQ_IVF_Layer=PQ_IVF(file_path=self.file_path,chunk_size=10,K_means_n_clusters=3,K_means_max_iter=100,ivf_folder_path=self.database_path + "/Level1",pq_D_=10,pq_K_means_n_clusters=2)
 
         # Indexing
         PQ_IVF_Layer.PQ_IVF_index()

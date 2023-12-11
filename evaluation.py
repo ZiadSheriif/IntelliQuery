@@ -22,8 +22,6 @@ class Result:
 # def run_queries(db1,db2, np_rows, top_k, num_runs,delete=False):
 def run_queries(db, np_rows, top_k, num_runs, delete=False):
     results = []
-    # results_worst = []
-    # results_best = []
     for i in range(num_runs):
         if delete:
             query = np.random.random((1,70))
@@ -157,10 +155,10 @@ if __name__ == "__main__":
         
 
  
-    # # Worst
-    # res_worst = run_queries(worst_api, records_np, top_k, number_of_queries,args.delete)
-    # # Best
-    # res_best = run_queries(best_api, records_np, top_k, number_of_queries,False)
+    # Worst
+    res_worst = run_queries(worst_api, records_np, top_k, number_of_queries,args.delete)
+    # Best
+    res_best = run_queries(best_api, records_np, top_k, number_of_queries,False)
 
     # compare_results_print(res_worst,res_best,top_k)
     # print("Worst:",eval(res_worst))
