@@ -1,8 +1,11 @@
 from typing import Dict, List, Annotated
 import numpy as np
-from utils import empty_folder
+from utils import empty_folder,read_binary_file_chunk
 from Modules.LSH import *
 import struct
+
+
+from sklearn.cluster import MiniBatchKMeans
 
 class VecDBBest:
     def __init__(self,file_path="./DataBase/data.bin", database_path = "./DataBase", new_db = True) -> None:
@@ -13,8 +16,7 @@ class VecDBBest:
         self.database_path= database_path  # Path of the Folder to Create Indexes
 
         if new_db:
-            # If New Data Base
-            # Empty DataBase Folder
+            # If New DataBase Empty DataBase Folder
             empty_folder(self.database_path)
             
             # just open new file to delete the old one
@@ -28,7 +30,8 @@ class VecDBBest:
         return (record_id) * record_size
 
     def insert_records_binary(self, rows: List[Dict[int, Annotated[List[float], 70]]]):
-        with open(self.file_path, "ab") as fout:  # Open the file in binary mode for appending
+        # Append in Binary Mode
+        with open(self.file_path, "ab") as fout:
             for row in rows:
                 id, embed = row["id"], row["embed"]
                 # Pack the data into a binary format
@@ -77,8 +80,21 @@ class VecDBBest:
         '''
         Build the Index
         '''
-        top_k_records = 100000
+        print('Hello Basma <3')
+        print("Building Index ..........")
+
+
+        # Initialize MiniBatchKMeans
+        kmeans = MiniBatchKMeans(n_clusters=3, random_state=42)
+
+        # Read Data from File chunk by chunk
+        chunk_size=10
+        data_chunk=read_binary_file_chunk(file_path=self.file_path,record_format=f"I{70}f",start_index=998,chunk_size=chunk_size)
+
+
+        return 
         
+        top_k_records = 100000
         # Layer 1 Indexing
         # TODO: Here we are reading the whole file: Change later
         level_1_in = self.get_top_k_records(top_k_records)

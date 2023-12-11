@@ -114,9 +114,9 @@ def compare_results_print(worst_res,best_res,top_k):
 if __name__ == "__main__":
     print("Hello Semantic LSH")
     
-    number_of_records = 100000
+    number_of_records = 1000
     number_of_features = 70
-    number_of_queries = 5
+    number_of_queries = 1
     top_k = 10
     print("******************************""")
     print("Number of records: ",number_of_records)
@@ -134,45 +134,37 @@ if __name__ == "__main__":
     parser.add_argument('-d','--delete', help='Description of the -d flag', action='store_true')
     args = parser.parse_args()
 
-    # worst_db = VecDBWorst('./DataBase/data.csv',new_db=not args.delete)
-    worst_api = DataApi('./DataBase/data_worst.csv',True,'./DataBase',args.delete)
-    # best_db = VecDBBest('./DataBase/data.bin','./DataBase',new_db=not args.delete)
-    best_api = DataApi('./DataBase/data.bin', False,'./DataBase',args.delete)
+    best_api = DataApi(file_path='./DataBase/data.bin',worst= False,database_path='./DataBase',delete_db=args.delete)
+    worst_api = DataApi(file_path='./DataBase/data_worst.csv',worst=True,database_path='./DataBase',delete_db=args.delete)
+
+
 
     if not args.delete:
         print("Reading")
-        # records_np = pd.read_csv('./DataBase/data.csv',header=None)
-        # rows_without_first_element = np.array([row[1:].tolist() for _, row in records_np.iterrows()])
-        # records_np=rows_without_first_element
-
-        records_database = np.array(best_api.get_first_k_records(number_of_records))
-        records_np = extract_embeds_array(records_database)
-        records_dict = records_database
-        _len = len(records_np)
+    #     # records_database = np.array(best_api.get_first_k_records(number_of_records))
+    #     # records_np = extract_embeds_array(records_database)
+    #     # records_dict = records_database
+    #     # _len = len(records_np)
     else:
-        # New
-
-        # records_database = np.array(best_api.get_first_k_records(10000))      
-        print("Generating data files")
+        print("Generating data files ........")
         records_np = np.random.random((number_of_records, number_of_features))
-        # records_np = extract_embeds_array(records_database)
 
         records_dict = [{"id": i, "embed": list(row)} for i, row in enumerate(records_np)]
-        # records_dict = records_database
         _len = len(records_np)
 
         worst_api.insert_records(records_dict)
         best_api.insert_records_binary(records_dict)
+        
 
  
-    # Worst
-    res_worst = run_queries(worst_api, records_np, top_k, number_of_queries,args.delete)
-    # Best
-    res_best = run_queries(best_api, records_np, top_k, number_of_queries,False)
+    # # Worst
+    # res_worst = run_queries(worst_api, records_np, top_k, number_of_queries,args.delete)
+    # # Best
+    # res_best = run_queries(best_api, records_np, top_k, number_of_queries,False)
 
-    compare_results_print(res_worst,res_best,top_k)
-    print("Worst:",eval(res_worst))
-    print("Best:",eval(res_best))
+    # compare_results_print(res_worst,res_best,top_k)
+    # print("Worst:",eval(res_worst))
+    # print("Best:",eval(res_best))
 
     # res = run_queries(best_api, records_np, 5, 3)
     # print("Best:",eval(res))

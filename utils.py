@@ -2,6 +2,50 @@ import numpy as np
 import shutil
 import os
 
+import struct
+
+def read_binary_file_chunk(file_path,record_format,start_index,chunk_size=10):
+    '''
+    This Function Reads Chunk from a binary File 
+    If remaining from file are < chunk size they are returned normally 
+
+    file_path:Path of the file to be read from
+    record_format: format of the record ex:f"4I" 4 integers 
+    start_index: index of the record from which we start reading [0_indexed]
+    chunk_size: no of records to be retrieved
+
+    @return : None in case out of index of file
+              the records
+    '''
+
+    # Calculate record size 
+    record_size = struct.calcsize(record_format)
+      
+
+    # Open the binary file for reading
+    with open(file_path, "rb") as fin:
+        fin.seek(start_index*record_size)  # Move the file pointer to the calculated offset
+
+        # Read a chunk of records
+        # .read() moves the file pointer (cursor) forward by the number of bytes read.
+        chunk_data = fin.read(record_size * (chunk_size))
+        if(len(chunk_data)==0):
+            print("Out Of File Index 🔥🔥")
+            return None
+
+        file_size = os.path.getsize(file_path)
+        # print("Current file position:", fin.tell())
+        print("data.bin file size (284 Byte)",file_size)
+        # print("File size:", file_size,"record_format",record_format,"record_size",record_size,"chunk_data len",len(chunk_data))
+
+        # Unpack Data
+        records = []
+        for i in range(0, len(chunk_data), record_size):
+            unpacked_record =struct.unpack(record_format, chunk_data[i:i + record_size])
+            id,vector=unpacked_record[0],unpacked_record[1:]
+            record={"id":id,"embed":list(vector)}
+            records.append(record)
+        return records
 
 
 def empty_folder(folder_path):
@@ -18,6 +62,7 @@ def empty_folder(folder_path):
                 shutil.rmtree(file_path)
         except Exception as e:
             print(f"Error while deleting {file_path}: {e}")
+    print("Deleted",folder_path,"successfully")
 
 def extract_embeds(dict):
     # {505: {'id': 505, 'embed': [0.8,....]}} --> [[0.8,....],[.......]]
@@ -25,6 +70,15 @@ def extract_embeds(dict):
 
 def extract_embeds_array(arr):
     return np.array([entry['embed'] for entry in arr])
+
+
+
+
+
+
+
+
+
 
 # def generate_random(k=100):
 #     # Sample data: k vectors with 70 features each
