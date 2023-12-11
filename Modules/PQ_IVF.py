@@ -66,13 +66,13 @@ class PQ_IVF:
             #     break
 
 
-
         # ############################################################### ######################################## ###############################################################
         # ############################################################### Step(2):Getting Residual for each vector ###############################################################
         # ############################################################### ################################# ###############################################################
         for i in range(no_chunks):
             print("Reading Chunk",i,"To predict ....")
             data_chunk=read_binary_file_chunk(file_path=self.file_path,record_format=f"I{70}f",start_index=i*self.chunk_size,chunk_size=self.chunk_size) #[{"id":,"embed":[]}]
+            print(len(data_chunk))
             # Extract Data
             ids=np.empty(len(data_chunk),dtype=int)
             vectors=np.empty((len(data_chunk),70))
@@ -105,11 +105,30 @@ class PQ_IVF:
                     for i in range(len(region_ids)):
                         data = struct.pack(f"I{70}f", region_ids[i], *region_vectors[i])
                         fout.write(data)
-                        print("write in",f"residuals_{label}",region_ids[i])
+                        # print("write in",f"residuals_{label}",region_ids[i])
 
 
-            # Test Read residuals of region 0
-            # data_chunk=read_binary_file_chunk(file_path=self.ivf_folder_path+f'/residuals_{0}.bin',record_format=f"I{70}f",start_index=0,chunk_size=500) #[{"id":,"embed":[]}]
+            # continue        
+        # # Test Read residuals of region 0
+        # counter=0
+        # ids_test=[]
+        # for i in range(4):
+        #     print("Region ..............................",i)
+        #         # We need to Read Data from File chunk by chunk
+        #     file_size = os.path.getsize(self.ivf_folder_path+f'/residuals_{i}.bin')
+        #     record_size=struct.calcsize(f"I{70}f")
+        #     n_records=file_size/record_size
+        #     no_chunks=math.ceil(n_records/self.chunk_size)
+        #     print("i",n_records)
+        #     data_chunk=read_binary_file_chunk(file_path=self.ivf_folder_path+f'/residuals_{i}.bin',record_format=f"I{70}f",start_index=0,chunk_size=1000) #[{"id":,"embed":[]}]
+        #     for entry in data_chunk:
+        #         id,vector=entry['id'],entry['embed']
+        #         ids_test.append(id)
+        #         print(entry)
+        #         counter+=1
+        # print("********************",counter,"************************")
+        # print(len(ids_test))
+
 
 
             ############################################################### ########################################## ###############################################################
@@ -207,7 +226,26 @@ class PQ_IVF:
                             data = struct.pack(f"I{self.pq_D_}I", ids_res[i], *pq__of_chunk_i[i])
                             fout.write(data)
 
-            
+
+        # Test Read residuals of region 0
+        counter=0
+        ids_test=[]
+        for i in range(4):
+            print("Region ..............................",i)
+                # We need to Read Data from File chunk by chunk
+            file_size = os.path.getsize(self.ivf_folder_path+f'/residuals_{i}_pq.bin')
+            record_size=struct.calcsize(f"I{70}I")
+            n_records=file_size/record_size
+            no_chunks=math.ceil(n_records/self.chunk_size)
+            print("i",n_records)
+            data_chunk=read_binary_file_chunk(file_path=self.ivf_folder_path+f'/residuals_{i}_pq.bin',record_format=f"I{70}I",start_index=0,chunk_size=10000) #[{"id":,"embed":[]}]
+            for entry in data_chunk:
+                id,vector=entry['id'],entry['embed']
+                ids_test.append(id)
+                print(entry)
+                counter+=1
+        print("********************",counter,"************************")
+        print(len(ids_test))   
         return
   
 
@@ -237,21 +275,21 @@ class PQ_IVF:
         # print("nearest_centroid",nearest_centroids.shape,nearest_centroids)
 
         # Read these Regions elements
-        temp=[]
-        for region in nearest_regions:
-            print("region.........",region)
-            file_size = os.path.getsize(self.ivf_folder_path+f'/residuals_{region}.bin')
-            record_size=struct.calcsize(f"I{70}f")
-            n_records=file_size/record_size
-            no_chunks=math.ceil(n_records/self.chunk_size)
-            print(region,n_records)
+        # temp=[]
+        # for region in nearest_regions:
+        #     print("region.........",region)
+        #     file_size = os.path.getsize(self.ivf_folder_path+f'/residuals_{region}.bin')
+        #     record_size=struct.calcsize(f"I{70}f")
+        #     n_records=file_size/record_size
+        #     no_chunks=math.ceil(n_records/self.chunk_size)
+        #     print(region,n_records)
 
-            data_chunk=read_binary_file_chunk(file_path=self.ivf_folder_path+f'/residuals_{region}.bin',record_format=f"I{70}f",start_index=0,chunk_size=100000) #[{"id":,"embed":[PQ]}]
-            for entry in data_chunk:
-                id,pq=entry['id'],entry['embed']
-                temp.append(id)
-        print("1st step",temp)
-        return np.array(temp)
+        #     data_chunk=read_binary_file_chunk(file_path=self.ivf_folder_path+f'/residuals_{region}.bin',record_format=f"I{70}f",start_index=0,chunk_size=100000) #[{"id":,"embed":[PQ]}]
+        #     for entry in data_chunk:
+        #         id,pq=entry['id'],entry['embed']
+        #         temp.append(id)
+        # print("1st step",temp)
+        # return np.array(temp)
 
 
              
