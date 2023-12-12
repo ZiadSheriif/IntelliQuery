@@ -21,10 +21,7 @@ def read_binary_file_chunk(file_path,record_format,start_index,chunk_size=10):
 
     # Calculate record size 
     record_size = struct.calcsize(record_format)
-    print("=======================================")
-    print("Record Size:",record_size)
-    print("Chunk Size:",chunk_size)
-    print("=======================================")
+
 
     # Open the binary file for reading
     with open(file_path, "rb") as fin:
@@ -33,9 +30,7 @@ def read_binary_file_chunk(file_path,record_format,start_index,chunk_size=10):
         # Read a chunk of records
         # .read() moves the file pointer (cursor) forward by the number of bytes read.
         chunk_data = fin.read(record_size * (chunk_size))
-        print("chunk_data len",len(chunk_data))
         if(len(chunk_data)==0):
-            print("start of the chunk: ",start_index)
             print("Out Of File Index 🔥🔥")
             return None
 

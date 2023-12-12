@@ -17,10 +17,10 @@ from utils import *
 def LSH_index(file_path, nbits, index_path, chunk_size=1000, d=70):
     # Calculate the size and number of records
     file_size = os.path.getsize(file_path)
-    # print("File size:", file_size)
     record_size = struct.calcsize(f"I{d}f")
     n_records = file_size // record_size
     no_chunks = math.ceil(n_records / chunk_size)
+    # print("File size:", file_size)
     # print("Number of records:", n_records)
     # print("Number of chunks:", no_chunks)
 
@@ -28,6 +28,7 @@ def LSH_index(file_path, nbits, index_path, chunk_size=1000, d=70):
     os.makedirs(index_path, exist_ok=True)
 
     for i in range(no_chunks):
+        print("LSH: Reading Chunk",i,"....................")
         data_chunk = read_binary_file_chunk(file_path, f"I{d}f", start_index=i * chunk_size, chunk_size=chunk_size)
 
         if data_chunk:
@@ -41,8 +42,8 @@ def LSH_index(file_path, nbits, index_path, chunk_size=1000, d=70):
             # Writing data to files within the chunk loop
             for j, decision in enumerate(data_set_decision_hamming):
                 hash_str = "".join(decision.astype(str))
-                file_path = os.path.join(index_path, hash_str + ".txt")
-                with open(file_path, "a") as file:
+                bucket_file_path = os.path.join(index_path, hash_str + ".txt")
+                with open(bucket_file_path, "a") as file:
                     file.write(str(data_chunk[j]["id"]) + "\n")
 
     return plane_norms

@@ -103,7 +103,7 @@ class VecDBBest:
 
         # print("-------------------------Indexing Done ---------------------")
         # return 
-        top_k_records = 100000
+        # top_k_records = 100000
         
         # measure the time
         start = time.time() 
