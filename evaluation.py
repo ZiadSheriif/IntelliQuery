@@ -25,9 +25,9 @@ def run_queries(db, np_rows, top_k, num_runs, delete=False):
     for i in range(num_runs):
         if delete:
             query = np.random.random((1,70))
-            np.save( "./Database/q"+str(i)+'.npy',query)
+            np.save( "./DataBase/q"+str(i)+'.npy',query)
         else:
-            query = np.load( "./Database/q"+str(i)+'.npy')
+            query = np.load( "./DataBase/q"+str(i)+'.npy')
 
         tic = time.time()
         db_ids = db.retrive(query,top_k)
@@ -111,8 +111,8 @@ def compare_results_print(worst_res,best_res,top_k):
     
 if __name__ == "__main__":
     print("Hello Semantic LSH")
-
-    number_of_records = 1000
+    
+    number_of_records = 100000
     number_of_features = 70
     number_of_queries = 1
     top_k = 5
