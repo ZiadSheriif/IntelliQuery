@@ -78,7 +78,7 @@ class VecDBBest:
         '''
         Build the Index
         '''
-        top_k_records = 1000000
+        top_k_records = 2000
         
         # measure the time
         start = time.time() 
