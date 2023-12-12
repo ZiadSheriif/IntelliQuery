@@ -27,9 +27,9 @@ def run_queries(db, np_rows, top_k, num_runs, delete=False):
     for i in range(num_runs):
         if delete:
             query = np.random.random((1,70))
-            np.save( "./Database/q"+str(i)+'.npy',query)
+            np.save( "./DataBase/q"+str(i)+'.npy',query)
         else:
-            query = np.load( "./Database/q"+str(i)+'.npy')
+            query = np.load( "./DataBase/q"+str(i)+'.npy')
 
         tic = time.time()
         db_ids = db.retrive(query,top_k)
