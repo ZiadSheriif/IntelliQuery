@@ -2,35 +2,37 @@ import numpy as np
 import shutil
 import os
 import math
-
+from typing import Dict, List, Annotated
 import struct
 
-def read_binary_file_chunk(file_path,record_format,start_index,chunk_size=10):
-    '''
-    This Function Reads Chunk from a binary File 
-    If remaining from file are < chunk size they are returned normally 
+
+def read_binary_file_chunk(file_path, record_format, start_index, chunk_size=10):
+    """
+    This Function Reads Chunk from a binary File
+    If remaining from file are < chunk size they are returned normally
 
     file_path:Path of the file to be read from
-    record_format: format of the record ex:f"4I" 4 integers 
+    record_format: format of the record ex:f"4I" 4 integers
     start_index: index of the record from which we start reading [0_indexed]
     chunk_size: no of records to be retrieved
 
     @return : None in case out of index of file
               the records
-    '''
+    """
 
-    # Calculate record size 
+    # Calculate record size
     record_size = struct.calcsize(record_format)
-
 
     # Open the binary file for reading
     with open(file_path, "rb") as fin:
-        fin.seek(start_index*record_size)  # Move the file pointer to the calculated offset
+        fin.seek(
+            start_index * record_size
+        )  # Move the file pointer to the calculated offset
 
         # Read a chunk of records
         # .read() moves the file pointer (cursor) forward by the number of bytes read.
         chunk_data = fin.read(record_size * (chunk_size))
-        if(len(chunk_data)==0):
+        if len(chunk_data) == 0:
             print("Out Of File Index 🔥🔥")
             return None
 
@@ -41,18 +43,20 @@ def read_binary_file_chunk(file_path,record_format,start_index,chunk_size=10):
         # Unpack Data
         records = []
         for i in range(0, len(chunk_data), record_size):
-            unpacked_record =struct.unpack(record_format, chunk_data[i:i + record_size])
-            id,vector=unpacked_record[0],unpacked_record[1:]
-            record={"id":id,"embed":list(vector)}
+            unpacked_record = struct.unpack(
+                record_format, chunk_data[i : i + record_size]
+            )
+            id, vector = unpacked_record[0], unpacked_record[1:]
+            record = {"id": id, "embed": list(vector)}
             records.append(record)
         return records
 
 
 def empty_folder(folder_path):
-    '''
+    """
     Function to Empty a folder given its path
     @param folder_path : path of the folder to be deleted
-    '''
+    """
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
         try:
@@ -62,15 +66,16 @@ def empty_folder(folder_path):
                 shutil.rmtree(file_path)
         except Exception as e:
             print(f"Error while deleting {file_path}: {e}")
-    print("Deleted",folder_path,"successfully")
+    print("Deleted", folder_path, "successfully")
+
 
 def extract_embeds(dict):
     # {505: {'id': 505, 'embed': [0.8,....]}} --> [[0.8,....],[.......]]
-    return [entry['embed'] for entry in dict.values()]
+    return [entry["embed"] for entry in dict.values()]
+
 
 def extract_embeds_array(arr):
-    return np.array([entry['embed'] for entry in arr])
-
+    return np.array([entry["embed"] for entry in arr])
 
 
 def _cal_score(vec1, vec2):
@@ -81,12 +86,33 @@ def _cal_score(vec1, vec2):
     return cosine_similarity
 
 
+def calculate_offset(record_id: int) -> int:
+    # Calculate the offset for a given record ID
+    record_size = struct.calcsize("I70f")
+    return (record_id) * record_size
 
 
+def read_multiple_records_by_id(file_path, records_id: List[int]):
+    record_size = struct.calcsize("I70f")
+    records = {}
 
+    with open(file_path, "rb") as fin:
+        for i in range(len(records_id)):
+            offset = calculate_offset(records_id[i])
+            fin.seek(offset)  # Move the file pointer to the calculated offset
+            data = fin.read(record_size)
+            if not data:
+                records[records_id[i]] = None
+                continue
 
+            # Unpack the binary data into a dictionary
+            unpacked_data = struct.unpack("I70f", data)
+            id_value, floats = unpacked_data[0], unpacked_data[1:]
 
-
+            # Create and return the record dictionary
+            record = {"id": id_value, "embed": list(floats)}
+            records[records_id[i]] = record
+    return records
 
 
 # def generate_random(k=100):
@@ -101,7 +127,6 @@ def _cal_score(vec1, vec2):
 #     # read_data = np.loadtxt(file_path)
 
 
-
 # def array_to_dictionary(values,keys=None):
 #     '''
 #     values: [array of values]
@@ -113,7 +138,7 @@ def _cal_score(vec1, vec2):
 #     if(len(values)!=len(keys)):
 #         print ("array_to_dictionary(): InCorrect Size of keys and values")
 #         return  None
-    
+
 #     dictionary_data = dict(zip(keys, values))
 #     return dictionary_data
 
@@ -125,8 +150,6 @@ def _cal_score(vec1, vec2):
 #     '''
 #     read_data = np.loadtxt(data_path)
 #     return read_data[id]
-
-
 
 
 # def check_dir(path):
