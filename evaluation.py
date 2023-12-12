@@ -12,6 +12,8 @@ from typing import List
 
 AVG_OVERX_ROWS = 1
 
+import pickle
+
 @dataclass
 class Result:
     run_time: float
@@ -112,10 +114,10 @@ def compare_results_print(worst_res,best_res,top_k):
 if __name__ == "__main__":
     print("Hello Semantic LSH")
 
-    number_of_records = 1000
+    number_of_records = 100000
     number_of_features = 70
     number_of_queries = 1
-    top_k = 5
+    top_k = 10
     print("******************************""")
     print("Number of records: ",number_of_records)
     print("Number of queries: ",number_of_queries)
@@ -139,10 +141,12 @@ if __name__ == "__main__":
 
     if not args.delete:
         print("Reading")
-    #     # records_database = np.array(best_api.get_first_k_records(number_of_records))
-    #     # records_np = extract_embeds_array(records_database)
-    #     # records_dict = records_database
-    #     # _len = len(records_np)
+        with open('best_api.pkl', 'rb') as file:
+            best_api = pickle.load(file)
+        records_database = np.array(best_api.get_first_k_records(number_of_records))
+        records_np = extract_embeds_array(records_database)
+        records_dict = records_database
+        _len = len(records_np)
     else:
         print("Generating data files ........")
         records_np = np.random.random((number_of_records, number_of_features))
@@ -152,6 +156,10 @@ if __name__ == "__main__":
 
         worst_api.insert_records(records_dict)
         best_api.insert_records_binary(records_dict)
+
+        # Save the Object to be read Again
+        with open('best_api.pkl', 'wb') as file:
+            pickle.dump(best_api, file)
         
 
  
