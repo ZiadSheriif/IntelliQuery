@@ -1,6 +1,6 @@
 from utils import *
 from sklearn.cluster import MiniBatchKMeans
-
+from utils import _cal_score
 
 class PQ_IVF:
     def __init__(self,file_path,chunk_size,K_means_n_clusters,K_means_max_iter,ivf_folder_path,pq_D_,pq_K_means_n_clusters):
@@ -45,7 +45,7 @@ class PQ_IVF:
 
         # Step(1) Getting Centroids
         # Initialize MiniBatchKMeans to clustering
-        kmeans = MiniBatchKMeans(n_clusters=self.K_means_n_clusters, batch_size=self.chunk_size, max_iter=self.K_means_max_iter,n_init=4,random_state=42)
+        kmeans = MiniBatchKMeans(n_clusters=self.K_means_n_clusters, batch_size=self.chunk_size, max_iter=self.K_means_max_iter,n_init='auto',random_state=42)
         
         print("***********Reading File in build index()*****************")
         print("data.bin file size (R=284 Byte): ",file_size)
@@ -55,7 +55,7 @@ class PQ_IVF:
 
         # Loop to get the Kmeans Centroids
         for i in range(no_chunks):
-            print("Reading Chunk",i,"To compute centroids....")
+            # print("Reading Chunk",i,"To compute centroids....")
             data_chunk=read_binary_file_chunk(file_path=self.file_path,record_format=f"I{70}f",start_index=i*self.chunk_size,chunk_size=self.chunk_size) #[{"id":,"embed":[]}]
             # Extract Data
             chunk_vectors=np.array([entry['embed'] for entry in data_chunk])
@@ -69,10 +69,10 @@ class PQ_IVF:
         # ############################################################### ######################################## ###############################################################
         # ############################################################### Step(2):Getting Residual for each vector ###############################################################
         # ############################################################### ################################# ###############################################################
+        labels_freq=np.zeros(self.K_means_n_clusters) #Check Point
         for i in range(no_chunks):
-            print("Reading Chunk",i,"To predict ....")
+            # print("Reading Chunk",i,"To predict ....")
             data_chunk=read_binary_file_chunk(file_path=self.file_path,record_format=f"I{70}f",start_index=i*self.chunk_size,chunk_size=self.chunk_size) #[{"id":,"embed":[]}]
-            print(len(data_chunk))
             # Extract Data
             ids=np.empty(len(data_chunk),dtype=int)
             vectors=np.empty((len(data_chunk),70))
@@ -88,6 +88,8 @@ class PQ_IVF:
             # print("data_chunk[0]",data_chunk[0])
             # print("ids[0]",ids[0])
             # print("labels[0]",labels[0])
+            
+ 
 
 
 
@@ -96,40 +98,16 @@ class PQ_IVF:
                 region_vectors=vectors[labels==label]  # get vectors belonging to such region
                 region_vectors-=self.K_means_centroids [label]
 
-                # if(label==labels[0]):
-                #     print(region_vectors)
-                #     return None
+                labels_freq[label]+=len(region_ids)
+
+     
     
                 # Open file of this Region(cluster)
                 with open(self.ivf_folder_path+f'/residuals_{label}.bin', "ab") as fout:
                     for i in range(len(region_ids)):
                         data = struct.pack(f"I{70}f", region_ids[i], *region_vectors[i])
                         fout.write(data)
-                        # print("write in",f"residuals_{label}",region_ids[i])
-
-
-            # continue        
-        # # Test Read residuals of region 0
-        # counter=0
-        # ids_test=[]
-        # for i in range(4):
-        #     print("Region ..............................",i)
-        #         # We need to Read Data from File chunk by chunk
-        #     file_size = os.path.getsize(self.ivf_folder_path+f'/residuals_{i}.bin')
-        #     record_size=struct.calcsize(f"I{70}f")
-        #     n_records=file_size/record_size
-        #     no_chunks=math.ceil(n_records/self.chunk_size)
-        #     print("i",n_records)
-        #     data_chunk=read_binary_file_chunk(file_path=self.ivf_folder_path+f'/residuals_{i}.bin',record_format=f"I{70}f",start_index=0,chunk_size=1000) #[{"id":,"embed":[]}]
-        #     for entry in data_chunk:
-        #         id,vector=entry['id'],entry['embed']
-        #         ids_test.append(id)
-        #         print(entry)
-        #         counter+=1
-        # print("********************",counter,"************************")
-        # print(len(ids_test))
-
-
+        
 
             ############################################################### ########################################## ###############################################################
             ############################################################### Step(3):Getting Centroids for PQ Residuals ###############################################################
@@ -227,25 +205,25 @@ class PQ_IVF:
                             fout.write(data)
 
 
-        # Test Read residuals of region 0
-        counter=0
-        ids_test=[]
-        for i in range(4):
-            print("Region ..............................",i)
-                # We need to Read Data from File chunk by chunk
-            file_size = os.path.getsize(self.ivf_folder_path+f'/residuals_{i}_pq.bin')
-            record_size=struct.calcsize(f"I{70}I")
-            n_records=file_size/record_size
-            no_chunks=math.ceil(n_records/self.chunk_size)
-            print("i",n_records)
-            data_chunk=read_binary_file_chunk(file_path=self.ivf_folder_path+f'/residuals_{i}_pq.bin',record_format=f"I{70}I",start_index=0,chunk_size=10000) #[{"id":,"embed":[]}]
-            for entry in data_chunk:
-                id,vector=entry['id'],entry['embed']
-                ids_test.append(id)
-                print(entry)
-                counter+=1
-        print("********************",counter,"************************")
-        print(len(ids_test))   
+        # # Test Read residuals of region 0
+        # counter=0
+        # ids_test=[]
+        # for i in range(4):
+        #     print("Region ..............................",i)
+        #         # We need to Read Data from File chunk by chunk
+        #     file_size = os.path.getsize(self.ivf_folder_path+f'/residuals_{i}_pq.bin')
+        #     record_size=struct.calcsize(f"I{70}I")
+        #     n_records=file_size/record_size
+        #     no_chunks=math.ceil(n_records/self.chunk_size)
+        #     print("i",n_records)
+        #     data_chunk=read_binary_file_chunk(file_path=self.ivf_folder_path+f'/residuals_{i}_pq.bin',record_format=f"I{70}I",start_index=0,chunk_size=10000) #[{"id":,"embed":[]}]
+        #     for entry in data_chunk:
+        #         id,vector=entry['id'],entry['embed']
+        #         ids_test.append(id)
+        #         print(entry)
+        #         counter+=1
+        # print("********************",counter,"************************")
+        # print(len(ids_test))   
         return
   
 
@@ -262,13 +240,14 @@ class PQ_IVF:
         # ################################################### Step(1) for query ,the k nearest centroids of Voronoi partitions are found ###############################################################
         # ################################################### ########################################################################## ###############################################################
         
-        assert self.K_means_centroids.shape[0]>n_regions,"n_regions K must be less than the no of regions [Check Medium]"
+        assert self.K_means_centroids.shape[0]>=n_regions,"n_regions K must be less than the no of regions [Check Medium]"
         # Calculate distances using Euclidean distance (you can also use cosine similarity) [TODO check]
         distances = np.linalg.norm(self.K_means_centroids - query, axis=1)
         # self.K_means_centroids.predict(data)
 
         # Get indices of the nearest vectors
         nearest_regions= np.argsort(distances)[:n_regions]
+        print("********nearest_regions********",nearest_regions)
 
         # Get the nearest centroid
         nearest_centroids = self.K_means_centroids[nearest_regions]
@@ -276,20 +255,77 @@ class PQ_IVF:
 
         # Read these Regions elements
         # temp=[]
-        # for region in nearest_regions:
-        #     print("region.........",region)
-        #     file_size = os.path.getsize(self.ivf_folder_path+f'/residuals_{region}.bin')
-        #     record_size=struct.calcsize(f"I{70}f")
-        #     n_records=file_size/record_size
-        #     no_chunks=math.ceil(n_records/self.chunk_size)
-        #     print(region,n_records)
+        for region in nearest_regions:
+            file_size = os.path.getsize(self.ivf_folder_path+f'/residuals_{region}.bin')
+            record_size=struct.calcsize(f"I{70}f")
+            n_records=file_size/record_size
+            no_chunks=math.ceil(n_records/self.chunk_size)
+            # print("Kmeans Region",region,n_records)
 
-        #     data_chunk=read_binary_file_chunk(file_path=self.ivf_folder_path+f'/residuals_{region}.bin',record_format=f"I{70}f",start_index=0,chunk_size=100000) #[{"id":,"embed":[PQ]}]
-        #     for entry in data_chunk:
-        #         id,pq=entry['id'],entry['embed']
-        #         temp.append(id)
+            data_chunk=read_binary_file_chunk(file_path=self.ivf_folder_path+f'/residuals_{region}.bin',record_format=f"I{70}f",start_index=0,chunk_size=100000) #[{"id":,"embed":[PQ]}]
+            for entry in data_chunk:
+                id,pq=entry['id'],entry['embed']
+                # temp.append(id)
+            # print("region",region,temp)
+            # temp=[]
         # print("1st step",temp)
         # return np.array(temp)
+    # #########################################################################################################################################################################
+    #     # return None
+    #     scores=[]
+    #     temp=[]
+    #     temp_set=set()
+    #     for region_i,region in enumerate(nearest_regions):
+    #         # Every Region
+    #         file_size = os.path.getsize(self.ivf_folder_path+f'/residuals_{region}.bin')
+    #         record_size=struct.calcsize(f"I{70}f")
+    #         n_records=file_size/record_size
+    #         no_chunks=math.ceil(n_records/self.chunk_size)
+    #         # print(region,n_records)
+
+    #         for i in range(no_chunks):
+    #             # Read the residual chunk by chunk
+    #             data_chunk=read_binary_file_chunk(file_path=self.ivf_folder_path+f'/residuals_{region}.bin',record_format=f"I{70}f",start_index=i*self.chunk_size,chunk_size=self.chunk_size) #[{"id":,"embed":[embed]}]
+    #             # print(data_chunk) #PQ of the elements in region
+    #             for entry in data_chunk:
+    #                     id,residual=entry['id'],entry['embed']
+    #                     temp.append(id)
+    #                     # print(id,pq)
+    #                     # Slice elements based on the indices [Use arange ]
+    #                     # partial_distance = partial_distances_region_i[pq, np.arange(partial_distances_region_i.shape[1]),region_i]
+                        
+    #                     # print(partial_distance)
+    #                     # partial_distance=partial_distances_region_i[pq,:,region_i]
+    #                     # print(partial_distance.shape)
+    #                     # print(partial_distance)
+
+                        
+    #                     # Computing distance from a query to database vector by using PQ code and distance table
+    #                     # query_db_vector_distance= np.sqrt(np.sum((partial_distance)**2))
+    #                     # print("query_db_vector_distance",query_db_vector_distance)
+
+    #                     # Add this to the scores one
+    #                     score = _cal_score(query, residual)
+    #                     scores.append((score, id))
+    #                     # scores.append((query_db_vector_distance, id))
+
+    #         print("-----Reading region",region,temp)
+    #         temp_set.update(temp)
+    #         temp=[]
+    #     # print("####No",len(temp_set))
+        
+    #     # ########################################### ##################### ###################################################
+    #     # ########################################### Step(5) Get nearest k ###################################################
+    #     # ########################################### ##################### ###################################################
+    #     # TODO Handle if less than top_k 
+    #     # here we assume that if two rows have the same score, return the lowest ID
+    #     # print(sorted(scores, reverse=True)[:500],".HHHHHHHHHHHHHHHHHHHHHHHHHHH")
+    #     print("scores len",len(scores))
+    #     # scores = sorted(scores, reverse=True)[:top_k]
+    #     scores = sorted(scores, reverse=True)
+
+    #     return [s[1] for s in scores] 
+    ##############################################################################################################################################################
 
 
              

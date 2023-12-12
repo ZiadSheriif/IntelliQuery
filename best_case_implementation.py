@@ -72,7 +72,7 @@ class VecDBBest:
             fin.seek(0)
             for i in range(k):
                 data = fin.read(record_size)
-                unpacked_data = struct.unpack("I70f", data)
+                unpacked_data = struct.unpack(f"I{70}f", data)
                 id_value, floats = unpacked_data[0], unpacked_data[1:]
 
                 record = {"id": id_value, "embed": list(floats)} 
@@ -86,13 +86,15 @@ class VecDBBest:
         '''
         print("Building Index ..........")
 
-        # If Level 1 Folder Doesn't Exist just Create it :D
-        if not os.path.exists(self.database_path + "/Level1"):
-            os.makedirs(self.database_path + "/Level1")
+        # # If Level 1 Folder Doesn't Exist just Create it :D
+        # if not os.path.exists(self.database_path + "/Level1"):
+        #     os.makedirs(self.database_path + "/Level1")
 
 
         # PQ_IVF()
         # PQ_IVF_Layer=PQ_IVF(file_path=self.file_path,chunk_size=10,K_means_n_clusters=4,K_means_max_iter=100,ivf_folder_path=self.database_path + "/Level1",pq_D_=10,pq_K_means_n_clusters=4)
+        # # PQ_IVF()
+        # PQ_IVF_Layer=PQ_IVF(file_path=self.file_path,chunk_size=1000,K_means_n_clusters=10,K_means_max_iter=100,ivf_folder_path=self.database_path + "/Level1",pq_D_=10,pq_K_means_n_clusters=4)
         # self.level1=PQ_IVF_Layer
 
         # # Indexing
@@ -166,6 +168,29 @@ class VecDBBest:
         return:  list of the top_k similar vectors Ordered by Cosine Similarity
         '''
         
+        print(f"Retrieving top {top_k} ..........")
+        # final_result=self.level1.semantic_query_pq_ivf(query,top_k=top_k,n_regions=4)
+
+
+        # print("-------------------------Retrieval Done ---------------------")
+        # return final_result
+        # return None
+    
+
+        #TODO read planes from file
+        # with open(os.path.join("Database", "plane_norms.txt"), "r") as file:
+        #         plane_norms = np.loadtxt(file, dtype=float, ndmin=2)
+           
+        # print("length of first bucket",plane_norms[0].shape)
+        # print("length of second bucket",plane_norms[1].shape)
+        # print("length of third bucket",plane_norms[2].shape)
+        # print("Value of first bucket",plane_norms[0])
+        # self.level_1_planes = np.array(plane_norms[0])
+        # self.level_2_planes = np.array(plane_norms[1])
+        # self.level_3_planes =np.array(plane_norms[2])
+            
+            
+            
         # Retrieve from Level 1
         level_1_planes = np.load(self.database_path + "/Level1"+'/metadata.npy')
         bucket_1,result = semantic_query_lsh(query, level_1_planes, self.database_path + "/Level1")
