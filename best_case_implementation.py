@@ -85,21 +85,21 @@ class VecDBBest:
         '''
         print("Building Index ..........")
 
-        # If Level 1 Folder Doesn't Exist just Create it :D
-        if not os.path.exists(self.database_path + "/Level1"):
-            os.makedirs(self.database_path + "/Level1")
+        # # If Level 1 Folder Doesn't Exist just Create it :D
+        # if not os.path.exists(self.database_path + "/Level1"):
+        #     os.makedirs(self.database_path + "/Level1")
 
 
-        # PQ_IVF()
-        PQ_IVF_Layer=PQ_IVF(file_path=self.file_path,chunk_size=1000,K_means_n_clusters=10,K_means_max_iter=100,ivf_folder_path=self.database_path + "/Level1",pq_D_=10,pq_K_means_n_clusters=4)
-        self.level1=PQ_IVF_Layer
+        # # PQ_IVF()
+        # PQ_IVF_Layer=PQ_IVF(file_path=self.file_path,chunk_size=1000,K_means_n_clusters=10,K_means_max_iter=100,ivf_folder_path=self.database_path + "/Level1",pq_D_=10,pq_K_means_n_clusters=4)
+        # self.level1=PQ_IVF_Layer
 
-        # Indexing
-        PQ_IVF_Layer.PQ_IVF_index()
+        # # Indexing
+        # PQ_IVF_Layer.PQ_IVF_index()
 
 
-        print("-------------------------Indexing Done ---------------------")
-        return 
+        # print("-------------------------Indexing Done ---------------------")
+        # return 
         top_k_records = 100000
         # Layer 1 Indexing
         # TODO: Here we are reading the whole file: Change later
@@ -136,11 +136,11 @@ class VecDBBest:
         '''
         
         print(f"Retrieving top {top_k} ..........")
-        final_result=self.level1.semantic_query_pq_ivf(query,top_k=top_k,n_regions=4)
+        # final_result=self.level1.semantic_query_pq_ivf(query,top_k=top_k,n_regions=4)
 
 
-        print("-------------------------Retrieval Done ---------------------")
-        return final_result
+        # print("-------------------------Retrieval Done ---------------------")
+        # return final_result
         # return None
     
 
