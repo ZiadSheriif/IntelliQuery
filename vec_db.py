@@ -5,6 +5,7 @@ import numpy as np
 import time
 import os
 from Modules.LSH import LSH_index, semantic_query_lsh
+from Modules.IVF_basma import IVF_index
 
 
 
@@ -43,15 +44,25 @@ class VecDB:
         '''
         Build the Index
         '''
-        print("Building Index ..........")     
-        
-        # Layer 1 Indexing
-        # TODO: Here we are reading the whole file: Change later
-        # level_1_in = self.get_top_k_records(top_k_records)
-        level_1_planes = LSH_index(file_path=self.file_path, nbits=Level_1_nbits, chunk_size=1000,index_path=self.database_path + "/Level1")
-        np.save(self.database_path + "/Level1/"+'metadata.npy',level_1_planes)
-        print("Layer 1 Finished")
+        print("Building Index ..........")   
+
+        # Make Level1 Folder
+        Level1_folder_path = self.database_path+'/Level1'
+        if not os.path.exists(Level1_folder_path):
+                os.makedirs(Level1_folder_path)
+
+        # IVF Layer 1 Indexing
+        chunk_size=1000
+        IVF_index(file_path=self.file_path,K_means_n_clusters=10,k_means_batch_size=chunk_size,k_means_max_iter=100,k_means_n_init='auto',chunk_size=chunk_size,index_folder_path=Level1_folder_path)
         return
+          
+        
+        # # Layer 1 Indexing
+        # # level_1_in = self.get_top_k_records(top_k_records)
+        # level_1_planes = LSH_index(file_path=self.file_path, nbits=Level_1_nbits, chunk_size=1000,index_path=self.database_path + "/Level1")
+        # np.save(self.database_path + "/Level1/"+'metadata.npy',level_1_planes)
+        # print("Layer 1 Finished")
+        # return
         
         
         

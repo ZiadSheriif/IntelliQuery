@@ -6,7 +6,7 @@ from typing import Dict, List, Annotated
 import struct
 
 
-def read_binary_file_chunk(file_path, record_format, start_index, chunk_size=10):
+def read_binary_file_chunk(file_path, record_format, start_index, chunk_size=10,dictionary_format=False):
     """
     This Function Reads Chunk from a binary File
     If remaining from file are < chunk size they are returned normally
@@ -39,6 +39,14 @@ def read_binary_file_chunk(file_path, record_format, start_index, chunk_size=10)
         # file_size = os.path.getsize(file_path)
         # print("Current file position:", fin.tell())
         # print("File size:", file_size,"record_format",record_format,"record_size",record_size,"chunk_data len",len(chunk_data))
+
+        if dictionary_format:
+            records={}
+            for i in range(0, len(chunk_data), record_size):
+                unpacked_record = struct.unpack(record_format, chunk_data[i : i + record_size])
+                id, vector = unpacked_record[0], unpacked_record[1:]
+                records[id]=np.array(vector)
+            return records
 
         # Unpack Data
         records = []
