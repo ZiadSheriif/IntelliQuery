@@ -107,7 +107,7 @@ def semantic_query_lsh(query, plane_norms, index_path, top_k_neighbours=6):
     hamming_distances = np.array([np.sum(bucket != query_decision) for bucket in bucket_binary_arrays])
 
     # Get the indices of the buckets with the smallest Hamming distances
-    nearest_bucket_indices = np.argsort(hamming_distances)[:top_k_neighbours]
+    nearest_bucket_indices = np.argsort(hamming_distances)[:15]
 
     # Aggregate results from nearest buckets
     index_result = []
