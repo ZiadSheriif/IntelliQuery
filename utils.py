@@ -143,6 +143,11 @@ def empty_folder(folder_path):
     Function to Empty a folder given its path
     @param folder_path : path of the folder to be deleted
     """
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+        print("Created new ", folder_path, "successfully")
+        return
+    
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
         try:
