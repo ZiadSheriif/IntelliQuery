@@ -20,7 +20,7 @@ def save_20M_record(data):
     empty_folder(folder_name)
 
     files=['data_100K.bin',"data_1M.bin"]
-    limits=[10**5,5*10**5]
+    limits=[10**5,10**6]
     for i,file in enumerate(files):
         data_part=data[:limits[i]]
 
@@ -48,7 +48,7 @@ def save_20M_record(data):
     # read_data=read_binary_file_chunk('./Data_TA/data_1M.bin',f"I{70}f",start_index=0,chunk_size=1000000,dictionary_format=True)
     # print("len(read_data)",len(read_data))
     # # print(read_data[0])
-    # print(read_data[5*10**5-1])
+    # print(read_data[10**6-1])
 
 def read_binary_file(file_path,format):
     print(format)
