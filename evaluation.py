@@ -138,8 +138,8 @@ if __name__ == "__main__":
     worst_api = DataApi(file_path='./DataBase/data_worst.csv',worst=True,database_path='./DataBase',delete_db=args.delete)
 
     if args.numberofrecords is not None:
-        print("new number of records: ",args.numberofrecords)
-        number_of_records = number_of_records
+        number_of_records = args.numberofrecords
+        print("new number of records: ",number_of_records)
 
     if not args.delete:
         print("Reading")
