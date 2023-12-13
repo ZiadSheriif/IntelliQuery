@@ -6,7 +6,52 @@ from typing import Dict, List, Annotated
 import struct
 import sys
 
+
+def save_20M_record(data):
+    '''
+    Given 20M record save them as required by the TA
+    data: (20M,70)
+    '''
+
+    folder_name='./Data_TA'
+    if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
+
+    empty_folder(folder_name)
+
+    files=['data_100K.bin',"data_1M.bin"]
+    limits=[10**5,5*10**5]
+    for i,file in enumerate(files):
+        data_part=data[:limits[i]]
+
+        # Append in Binary Mode
+        with open(folder_name+'/'+file, "ab") as fout:
+            for id,vector in enumerate(data_part):
+                # Pack the data into a binary format
+                unpacked_data = struct.pack(f"I{70}f", id, *vector)
+                fout.write(unpacked_data)
+
+    # # Test
+    # print("len(data)",len(data))
+    # # print(data[0])
+    # print(data[-1])
+    # read_data=read_binary_file_chunk('./Data_TA/data_100K.bin',f"I{70}f",start_index=0,chunk_size=1000000,dictionary_format=True)
+    # print("len(read_data)",len(read_data))
+    # # print(read_data[0])
+    # print(read_data[10**5-1])
+
+
+    # # Test
+    # print("len(data)",len(data))
+    # # print(data[0])
+    # print(data[-1])
+    # read_data=read_binary_file_chunk('./Data_TA/data_1M.bin',f"I{70}f",start_index=0,chunk_size=1000000,dictionary_format=True)
+    # print("len(read_data)",len(read_data))
+    # # print(read_data[0])
+    # print(read_data[5*10**5-1])
+
 def read_binary_file(file_path,format):
+    print(format)
     '''
     Read binary file from its format
     '''
@@ -94,8 +139,6 @@ def read_binary_file_chunk(file_path, record_format, start_index, chunk_size=10,
             record = {"id": id, "embed": list(vector)}
             records.append(record)
         return records
-
-
 def empty_folder(folder_path):
     """
     Function to Empty a folder given its path

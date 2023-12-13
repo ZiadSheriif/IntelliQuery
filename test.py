@@ -2,7 +2,7 @@ import numpy as np
 from worst_case_implementation import VecDBWorst
 from best_case_implementation import VecDBBest
 import argparse
-from utils import extract_embeds_array
+from utils import extract_embeds_array,save_20M_record
 import pandas as pd
 from api import DataApi
 import os
@@ -115,7 +115,7 @@ def compare_results_print(worst_res,best_res,top_k):
     
 if __name__ == "__main__":
     print("Hello Semantic LSH")
-    number_of_records = 100000
+    number_of_records = 500000
     number_of_features = 70
     number_of_queries = 5
     top_k = 10
@@ -152,6 +152,8 @@ if __name__ == "__main__":
     else:
         print("Generating data files ........")
         records_np = np.random.random((number_of_records, number_of_features))
+        # save_20M_record(data=records_np)
+
 
         records_dict = [{"id": i, "embed": list(row)} for i, row in enumerate(records_np)]
         _len = len(records_np)

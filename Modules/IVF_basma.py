@@ -118,7 +118,7 @@ def semantic_query_ivf(data_file_path,index_folder_path,query,top_k,n_regions):
     # ################################################### Step(1) for query ,the k nearest centroids of Voronoi partitions are found ###############################################################
     # ################################################### ########################################################################## ###############################################################
     # Step(1) Read Centroids
-    K_means_centroids=read_binary_file(index_folder_path+'/centroids.bin',f"{70}f")
+    K_means_centroids=read_binary_file(index_folder_path+'/centroids.bin',f"{70}f") 
 
     assert K_means_centroids.shape[0]>n_regions,"n_regions K must be less than the no of regions [Check Medium]"
 
