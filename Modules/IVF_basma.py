@@ -41,7 +41,18 @@ def IVF_index(file_path,K_means_n_clusters,k_means_batch_size,k_means_max_iter,k
 
     # Centroids
     K_means_centroids=kmeans.cluster_centers_
-    # TODO Saving Centroids
+    # Saving Centroids #TODO Check precision of centroids after read and write in the file @Basma Elhoseny 
+    write_binary_file(file_path=index_folder_path+'/centroids.bin',data_to_write=K_means_centroids,format=f"{70}f")
+
+    # ##################################################################
+    # #TEST# Centroids are Written Correct #############################
+    # ##################################################################
+    # K_means_centroids_check=read_binary_file(index_folder_path+'/centroids.bin',f"{70}f")
+    # print("Note: Some Approximations happen due to float ")
+    # print(K_means_centroids_check[2])
+    # print(K_means_centroids[2])
+
+
 
 
     # Step(2) Getting vectors of each regions

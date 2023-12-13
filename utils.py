@@ -5,6 +5,40 @@ import math
 from typing import Dict, List, Annotated
 import struct
 
+def read_binary_file(file_path,format):
+    '''
+    Read binary file from its format
+    '''
+    try:
+        with open(file_path,"rb") as fin:
+            file_size = os.path.getsize(file_path)
+            record_size=struct.calcsize(format)
+            n_records=file_size/record_size
+            # print("n_records",n_records)
+
+            fin.seek(0) #Move pointer to the beginning of the file
+            data = fin.read(record_size * int(n_records))
+            if not data:
+                print("Empty File ",file_path,"🔴🔴")
+                return None
+            # Unpack the binary data
+            data=np.frombuffer(data, dtype=np.dtype(format))
+        return data
+    except FileNotFoundError:
+        print(f"The file '{file_path}' Not Found.")
+        
+def write_binary_file(file_path,data_to_write,format):
+    '''
+    data_to_write: array of values with format as passed
+    format: format of each element
+    '''
+    try:
+        with open(file_path, "ab") as fout:
+            # Pack the entire array into binary data
+            binary_data = struct.pack(len(data_to_write)*format, *data_to_write.flatten())
+            fout.write(binary_data)
+    except FileNotFoundError:
+        print(f"The file '{file_path}' could not be created.")
 
 def read_binary_file_chunk(file_path, record_format, start_index, chunk_size=10,dictionary_format=False):
     """
@@ -43,6 +77,7 @@ def read_binary_file_chunk(file_path, record_format, start_index, chunk_size=10,
         if dictionary_format:
             records={}
             for i in range(0, len(chunk_data), record_size):
+                #TODO Remove this loop @Basma Elhoseny
                 unpacked_record = struct.unpack(record_format, chunk_data[i : i + record_size])
                 id, vector = unpacked_record[0], unpacked_record[1:]
                 records[id]=np.array(vector)
