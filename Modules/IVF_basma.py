@@ -134,7 +134,7 @@ def semantic_query_ivf(data_file_path,index_folder_path,query,top_k,n_regions):
     # print(nearest_centroids)
 
     # Get the vectors of these regions
-    # candidates=[]
+    candidates=[]
     scores=[]
     for region in nearest_regions:
         # file_size = os.path.getsize(index_folder_path+f'/cluster{region}.bin')
@@ -142,8 +142,8 @@ def semantic_query_ivf(data_file_path,index_folder_path,query,top_k,n_regions):
         # n_records=file_size/record_size
         # no_chunks=math.ceil(n_records/chunk_size_ids)
         region_ids=read_binary_file(file_path=index_folder_path+f'/cluster{region}.bin',format=f'I')
-        # candidates.extend(region_ids)
-        # continue
+        candidates.extend(region_ids)
+        continue
 
         # Read The vectors values from the original data file
         records=read_multiple_records_by_id(file_path=data_file_path, records_id=region_ids,dictionary_format=True)
@@ -155,7 +155,7 @@ def semantic_query_ivf(data_file_path,index_folder_path,query,top_k,n_regions):
             score = cal_score(query, vector)
             scores.append((score, id))
         scores = sorted(scores, reverse=True)[:top_k]
-    # return candidates
+    return candidates
     return [s[1] for s in scores]
     
 
