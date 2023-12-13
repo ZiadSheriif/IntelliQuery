@@ -144,6 +144,7 @@ def semantic_query_ivf(data_file_path,index_folder_path,query,top_k,n_regions):
 
         # Read The vectors values from the original data file
         records=read_multiple_records_by_id(file_path=data_file_path, records_id=region_ids,dictionary_format=True)
+        print("Region",region,len(records))
         region_ids=None #Empty
 
         # Calculate the Cosine Similarity between the Query and the Vectors
