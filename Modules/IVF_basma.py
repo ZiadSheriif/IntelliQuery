@@ -33,6 +33,7 @@ def IVF_index(file_path,K_means_metric,K_means_n_clusters,k_means_batch_size,k_m
 
     # Step(1) Getting centroids:
     # Loop to get the Kmeans Centroids
+    print("file_path",file_path)
     for i in range(no_chunks):
         data_chunk=read_binary_file_chunk(file_path=file_path,record_format=f"I{70}f",start_index=i*chunk_size,chunk_size=chunk_size) #[{"id":,"embed":[]}]
         # TODO Remove this loop
