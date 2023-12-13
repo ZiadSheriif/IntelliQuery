@@ -4,6 +4,7 @@ import os
 import math
 from typing import Dict, List, Annotated
 import struct
+import sys
 
 def read_binary_file(file_path,format):
     '''

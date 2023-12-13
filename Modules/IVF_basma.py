@@ -4,10 +4,11 @@ from sklearn.cluster import MiniBatchKMeans
 
 
 
-def IVF_index(file_path,K_means_n_clusters,k_means_batch_size,k_means_max_iter,k_means_n_init,chunk_size,index_folder_path):
+def IVF_index(file_path,K_means_metric,K_means_n_clusters,k_means_batch_size,k_means_max_iter,k_means_n_init,chunk_size,index_folder_path):
     '''
     file_path: path to the data .bin file
 
+    K_means_metric: metric to be used in clustering cosine or euclidean' or TODO use SCANN idea ERORR Think of another way this isn't supported in kmeans
     K_means_n_clusters: No of Kmeans Clusters
     k_means_batch_size: kmeans batch size to be sampled at each iteration of fitting
     k_means_max_iter: max iteration by kmeans default [100] in sklearn
@@ -75,15 +76,16 @@ def IVF_index(file_path,K_means_n_clusters,k_means_batch_size,k_means_max_iter,k
             # Open file of this Region(cluster) Just Once for every Region :D
             with open(index_folder_path+f'/cluster{label}.bin', "ab") as fout:
                 for i in range(len(region_ids)):
-                    data = struct.pack(f"I{70}f", region_ids[i], *region_vectors[i])
+                    #TODO Check whether store id of the vector @Basma Elhoseny
+                    data = struct.pack(f"I", region_ids[i])
                     fout.write(data)
 
     
             
                 
-    ###################################################################
-    ##TEST# no. of elements in each cluster ###########################
-    ###################################################################
+    ##################################################################
+    #TEST# no. of elements in each cluster ###########################
+    ##################################################################
     # count_region=[]
     # for region in range(K_means_n_clusters):
     #     with open(index_folder_path+f'/cluster{region}.bin', "ab") as fout:
@@ -98,12 +100,58 @@ def IVF_index(file_path,K_means_n_clusters,k_means_batch_size,k_means_max_iter,k
     return
 
 
-def semantic_query_pq_ivf(query,top_k):
+def semantic_query_ivf(data_file_path,index_folder_path,query,top_k,n_regions):
     '''
+    data_file_path: Path of the Original file .bin of 20M
+    index_folder_path: Index Folder eg: Level1
+    query: query to be retrieved
     top_k: nearest 
-    n_regions:no of regions to be candidates of the clusters
+    n_regions:no of regions to be candidates of the clusters for Edge Problem
+
+    chunk_size_ids :Used when just reading ids from cluster.bin TODO Check this @Basma Elhoseny
     '''
     # Use Centroid TODO Check if we need to not save just read
     print("semantic_query_ivf ()")
+
+
+         
+    # ################################################### ########################################################################## ###############################################################
+    # ################################################### Step(1) for query ,the k nearest centroids of Voronoi partitions are found ###############################################################
+    # ################################################### ########################################################################## ###############################################################
+    # Step(1) Read Centroids
+    K_means_centroids=read_binary_file(index_folder_path+'/centroids.bin',f"{70}f")
+
+    assert K_means_centroids.shape[0]>n_regions,"n_regions K must be less than the no of regions [Check Medium]"
+
+
+    # Calculate distances using Euclidean distance (you can also use cosine similarity) [TODO check]
+    distances = np.linalg.norm(K_means_centroids - query, axis=1)
+
+    # Get indices of the nearest centroids
+    nearest_regions= np.argsort(distances)[:n_regions]
+
+    # Get the nearest centroids [Not needed]
+    # nearest_centroids = K_means_centroids[nearest_regions]
+    # print(nearest_centroids)
+
+    # Get the vectors of these regions
+    for region in nearest_regions:
+        # file_size = os.path.getsize(index_folder_path+f'/cluster{region}.bin')
+        # record_size=struct.calcsize(f"I")
+        # n_records=file_size/record_size
+        # no_chunks=math.ceil(n_records/chunk_size_ids)
+        region_ids=read_binary_file(file_path=index_folder_path+f'/cluster{region}.bin',format=f'I')
+        # print(len(region_ids))
+
+        # Read The vectors values from the original data file
+        #START HEREEEEEEE 
+        # read_multiple_records_by_id(file_path=data_file_path, records_id=region_ids)
+
+
+
+
+        
+        
+    
 
     return 

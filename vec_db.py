@@ -5,7 +5,7 @@ import numpy as np
 import time
 import os
 from Modules.LSH import LSH_index, semantic_query_lsh
-from Modules.IVF_basma import IVF_index
+from Modules.IVF_basma import IVF_index,semantic_query_ivf
 
 
 
@@ -45,6 +45,8 @@ class VecDB:
         Build the Index
         '''
         print("Building Index ..........")   
+        # measure the time
+        start = time.time()
 
         # Make Level1 Folder
         Level1_folder_path = self.database_path+'/Level1'
@@ -53,8 +55,7 @@ class VecDB:
 
         # IVF Layer 1 Indexing
         chunk_size=1000
-        IVF_index(file_path=self.file_path,K_means_n_clusters=10,k_means_batch_size=chunk_size,k_means_max_iter=100,k_means_n_init='auto',chunk_size=chunk_size,index_folder_path=Level1_folder_path)
-        return
+        IVF_index(file_path=self.file_path,K_means_metric='euclidean',K_means_n_clusters=10,k_means_batch_size=chunk_size,k_means_max_iter=100,k_means_n_init='auto',chunk_size=chunk_size,index_folder_path=Level1_folder_path)
           
         
         # # Layer 1 Indexing
@@ -66,66 +67,71 @@ class VecDB:
         
         
         
-        # Layer 2 Indexing
-        for file_name in os.listdir(self.database_path + "/Level1"):
-            file_path = os.path.join(self.database_path + "/Level1", file_name)
-            if os.path.isfile(file_path) and file_name.lower().endswith(".txt"):
-                read_data_2 = np.loadtxt(file_path, dtype=int, ndmin=1)
-                level_2_in = self.read_multiple_records_by_id(read_data_2)
-                level_2_planes = LSH_index(data=level_2_in.values(), nbits=Level_2_nbits, index_path=self.database_path + "/Level2/" + file_name[:-4])
-                np.save(self.database_path + "/Level2/" + file_name[:-4]+'/metadata.npy',level_2_planes)
-        print("Layer 2 Finished")
-        return
+        # # Layer 2 Indexing
+        # for file_name in os.listdir(self.database_path + "/Level1"):
+        #     file_path = os.path.join(self.database_path + "/Level1", file_name)
+        #     if os.path.isfile(file_path) and file_name.lower().endswith(".txt"):
+        #         read_data_2 = np.loadtxt(file_path, dtype=int, ndmin=1)
+        #         level_2_in = self.read_multiple_records_by_id(read_data_2)
+        #         level_2_planes = LSH_index(data=level_2_in.values(), nbits=Level_2_nbits, index_path=self.database_path + "/Level2/" + file_name[:-4])
+        #         np.save(self.database_path + "/Level2/" + file_name[:-4]+'/metadata.npy',level_2_planes)
+        # print("Layer 2 Finished")
+        # return
         
         
-        # Layer 3 Indexing
-        for folder_name in os.listdir(self.database_path + "/Level2"):
-            folder_path = os.path.join(self.database_path + "/Level2", folder_name)
-            for file_name in os.listdir(folder_path):
-                file_path = os.path.join(folder_path, file_name)
-                if os.path.isfile(file_path)  and file_name.lower().endswith(".txt"):
-                    read_data_3 = np.loadtxt(file_path, dtype=int, ndmin=1)
-                    level_3_in = self.read_multiple_records_by_id(read_data_3)
-                    level_3_planes = LSH_index(data=level_3_in.values(), nbits=Level_3_nbits, index_path=self.database_path + "/Level3/" + folder_name + '/' + file_name[:-4])
-                    np.save(self.database_path + "/Level3/" + folder_name + '/' + file_name[:-4]+'/metadata.npy',level_3_planes)
-        print("Layer 3 Finished")
-        
-        return
-        # Layer 4 Indexing
-        for folder_name in os.listdir(self.database_path + "/Level3"):
-            folder_path = os.path.join(self.database_path + "/Level3", folder_name)
-            for folder_name_2 in os.listdir(folder_path):
-                folder_path_2 = os.path.join(folder_path, folder_name_2)
-                for file_name in os.listdir(folder_path_2):
-                    file_path = os.path.join(folder_path_2, file_name)
-                    if os.path.isfile(file_path)  and file_name.lower().endswith(".txt"):
-                        read_data_4 = np.loadtxt(file_path, dtype=int, ndmin=1)
-                        level_4_in = self.read_multiple_records_by_id(read_data_4)
-                        level_4_planes = LSH_index(data=level_4_in.values(), nbits=Level_4_nbits, index_path=self.database_path + "/Level4/" + folder_name + '/' + folder_name_2 + '/' + file_name[:-4])
-                        np.save(self.database_path + "/Level4/" + folder_name + '/' + folder_name_2 + '/' + file_name[:-4]+'/metadata.npy',level_4_planes)
-        print("Layer 4 Finished")
+        # # Layer 3 Indexing
+        # for folder_name in os.listdir(self.database_path + "/Level2"):
+        #     folder_path = os.path.join(self.database_path + "/Level2", folder_name)
+        #     for file_name in os.listdir(folder_path):
+        #         file_path = os.path.join(folder_path, file_name)
+        #         if os.path.isfile(file_path)  and file_name.lower().endswith(".txt"):
+        #             read_data_3 = np.loadtxt(file_path, dtype=int, ndmin=1)
+        #             level_3_in = self.read_multiple_records_by_id(read_data_3)
+        #             level_3_planes = LSH_index(data=level_3_in.values(), nbits=Level_3_nbits, index_path=self.database_path + "/Level3/" + folder_name + '/' + file_name[:-4])
+        #             np.save(self.database_path + "/Level3/" + folder_name + '/' + file_name[:-4]+'/metadata.npy',level_3_planes)
+        # print("Layer 3 Finished")
+        # return
+
+        # # Layer 4 Indexing
+        # for folder_name in os.listdir(self.database_path + "/Level3"):
+        #     folder_path = os.path.join(self.database_path + "/Level3", folder_name)
+        #     for folder_name_2 in os.listdir(folder_path):
+        #         folder_path_2 = os.path.join(folder_path, folder_name_2)
+        #         for file_name in os.listdir(folder_path_2):
+        #             file_path = os.path.join(folder_path_2, file_name)
+        #             if os.path.isfile(file_path)  and file_name.lower().endswith(".txt"):
+        #                 read_data_4 = np.loadtxt(file_path, dtype=int, ndmin=1)
+        #                 level_4_in = self.read_multiple_records_by_id(read_data_4)
+        #                 level_4_planes = LSH_index(data=level_4_in.values(), nbits=Level_4_nbits, index_path=self.database_path + "/Level4/" + folder_name + '/' + folder_name_2 + '/' + file_name[:-4])
+        #                 np.save(self.database_path + "/Level4/" + folder_name + '/' + folder_name_2 + '/' + file_name[:-4]+'/metadata.npy',level_4_planes)
+        # print("Layer 4 Finished")
         
         
         # measure the time
         end = time.time()
-        print("Time taken by Indexing: ",end - start)
+        print("Indexing Done ...... Time taken by Indexing: ",end - start)
+        return 
+    
     def retrive(self, query:Annotated[List[float], 70],top_k = 5)-> [int]:
         '''
         Get the top_k vectors similar to the Query
 
         return:  list of the top_k similar vectors Ordered by Cosine Similarity
         '''
-        
         print(f"Retrieving top {top_k} ..........")
-        # final_result=self.level1.semantic_query_pq_ivf(query,top_k=top_k,n_regions=4)
-           
-        # Retrieve from Level 1
-        level_1_planes = np.load(self.database_path + "/Level1"+'/metadata.npy')
-        bucket_1,result = semantic_query_lsh(query, level_1_planes, self.database_path + "/Level1")
-        print("length of first bucket",result.shape)
+        Level1_folder_path = self.database_path+'/Level1'
+        final_result=semantic_query_ivf(data_file_path=self.file_path,index_folder_path=Level1_folder_path,query=query,top_k=top_k,n_regions=4)
 
-        if len(result) < top_k:
-            print('level 1 smaller than top_k')
+        sys.exit()
+        
+           
+        # # Retrieve from Level 1
+        # level_1_planes = np.load(self.database_path + "/Level1"+'/metadata.npy')
+        # bucket_1,result = semantic_query_lsh(query, level_1_planes, self.database_path + "/Level1")
+        # print("length of first bucket",result.shape)
+
+        # if len(result) < top_k:
+        #     print('level 1 smaller than top_k')
         
         # # Retrieve from Level 2
         # level_2_planes = np.load(self.database_path + "/Level2/"+bucket_1+'/metadata.npy')
@@ -152,18 +158,18 @@ class VecDB:
         #     print('level 4 smaller than top_k')
         
         
-        # Retrieve from Data Base the Embeddings of the Vectors
-        final_result= read_multiple_records_by_id(self.file_path,result)
+        # # Retrieve from Data Base the Embeddings of the Vectors
+        # final_result= read_multiple_records_by_id(self.file_path,result)
         
         # Calculate the Cosine Similarity between the Query and the Vectors
-        scores = []
-        for row in final_result.values():
-            id_value = row['id']
-            embed_values = row['embed']
-            score = self._cal_score(query, embed_values)
-            scores.append((score, id_value))
-        scores = sorted(scores, reverse=True)[:top_k]
-        return [s[1] for s in scores]
+        # scores = []
+        # for row in final_result.values():
+        #     id_value = row['id']
+        #     embed_values = row['embed']
+        #     score = self._cal_score(query, embed_values)
+        #     scores.append((score, id_value))
+        # scores = sorted(scores, reverse=True)[:top_k]
+        # return [s[1] for s in scores]
         
         
         
