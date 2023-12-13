@@ -51,7 +51,6 @@ def save_20M_record(data):
     # print(read_data[10**6-1])
 
 def read_binary_file(file_path,format):
-    print(format)
     '''
     Read binary file from its format
     '''
