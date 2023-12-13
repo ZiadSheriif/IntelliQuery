@@ -18,8 +18,12 @@ class VecDB:
             self.database_path= database_path  # Path of the Folder to Create Indexes
 
             if new_db:
-                # If New DataBase Empty DataBase Folder
-                empty_folder(self.database_path)
+                if not os.path.exists(database_path):
+                    os.makedirs(database_path)
+
+                else: 
+                  # If New DataBase Empty DataBase Folder
+                  empty_folder(self.database_path)
                 
                 # just open new file to delete the old one
                 with open(self.file_path, "w") as fout:
