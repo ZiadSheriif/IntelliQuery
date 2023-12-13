@@ -136,9 +136,11 @@ def calculate_offset(record_id: int) -> int:
     return (record_id) * record_size
 
 
-def read_multiple_records_by_id(file_path, records_id: List[int]):
+def read_multiple_records_by_id(file_path, records_id: List[int],dictionary_format=False):
     record_size = struct.calcsize("I70f")
     records = {}
+
+    records_dictionary={}
 
     with open(file_path, "rb") as fin:
         for i in range(len(records_id)):
@@ -153,9 +155,14 @@ def read_multiple_records_by_id(file_path, records_id: List[int]):
             unpacked_data = struct.unpack("I70f", data)
             id_value, floats = unpacked_data[0], unpacked_data[1:]
 
-            # Create and return the record dictionary
-            record = {"id": id_value, "embed": list(floats)}
-            records[records_id[i]] = record
+            if dictionary_format:
+                records_dictionary[id_value]=list(floats)
+            else:
+                # Create and return the record dictionary
+                record = {"id": id_value, "embed": list(floats)}
+                records[records_id[i]] = record
+
+    if dictionary_format: return records_dictionary
     return records
 
 
