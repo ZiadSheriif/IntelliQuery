@@ -131,12 +131,15 @@ if __name__ == "__main__":
     # Mode
     parser = argparse.ArgumentParser(description='Description of your script')
     parser.add_argument('-d','--delete', help='Description of the -d flag', action='store_true')
+    parser.add_argument('-n', '--numberofrecords', type=int, help='Description of the -n flag')
     args = parser.parse_args()
 
     best_api = DataApi(file_path='./DataBase/data.bin',worst= False,database_path='./DataBase',delete_db=args.delete)
     worst_api = DataApi(file_path='./DataBase/data_worst.csv',worst=True,database_path='./DataBase',delete_db=args.delete)
 
-
+    if args.numberofrecords is not None:
+        print("new number of records: ",args.numberofrecords)
+        number_of_records = number_of_records
 
     if not args.delete:
         print("Reading")
