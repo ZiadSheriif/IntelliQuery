@@ -1,6 +1,5 @@
 from utils import *
 from sklearn.cluster import MiniBatchKMeans
-# from utils import _cal_score
 
 
 
@@ -135,18 +134,44 @@ def semantic_query_ivf(data_file_path,index_folder_path,query,top_k,n_regions):
     # print(nearest_centroids)
 
     # Get the vectors of these regions
+    scores=[]
     for region in nearest_regions:
         # file_size = os.path.getsize(index_folder_path+f'/cluster{region}.bin')
         # record_size=struct.calcsize(f"I")
         # n_records=file_size/record_size
         # no_chunks=math.ceil(n_records/chunk_size_ids)
         region_ids=read_binary_file(file_path=index_folder_path+f'/cluster{region}.bin',format=f'I')
-        # print(len(region_ids))
 
         # Read The vectors values from the original data file
-        #START HEREEEEEEE 
         records=read_multiple_records_by_id(file_path=data_file_path, records_id=region_ids,dictionary_format=True)
-        print(records)
+        region_ids=None #Empty
+
+        # Calculate the Cosine Similarity between the Query and the Vectors
+        for id,vector in records.items():
+            score = cal_score(query, vector)
+            scores.append((score, id))
+        scores = sorted(scores, reverse=True)[:top_k]
+            
+    return [s[1] for s in scores]
+    
+
+  
+        # query_vector_distances = np.linalg.norm(list(records.values()) - query, axis=1)
+
+        # # TODO check if you don;t need to sort it :D @Basma Elhoseny just pick top k
+        # i=0
+        # for id,_ in records.items():
+        #     scores.append((query_vector_distances[i],id))
+        #     i+=1
+
+
+    # # Sort Them
+    # scores = sorted(scores, reverse=True)[:top_k]
+    # return [s[1] for s in scores] 
+    # return scores
+
+
+
 
 
 

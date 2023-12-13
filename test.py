@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from typing import List
 from vec_db import VecDB
 
+import sys
 AVG_OVERX_ROWS = 1
 
 import pickle
@@ -163,8 +164,6 @@ if __name__ == "__main__":
         # with open('best_api.pkl', 'wb') as file:
             # pickle.dump(best_api, file)
         
-
- 
     # Worst
     res_worst = run_queries(worst_api, records_np, top_k, number_of_queries,args.delete)
     # Best

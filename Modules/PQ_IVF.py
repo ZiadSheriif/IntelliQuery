@@ -1,6 +1,5 @@
 from utils import *
 from sklearn.cluster import MiniBatchKMeans
-from utils import _cal_score
 
 class PQ_IVF:
     def __init__(self,file_path,chunk_size,K_means_n_clusters,K_means_max_iter,ivf_folder_path,pq_D_,pq_K_means_n_clusters):

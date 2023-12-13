@@ -122,7 +122,7 @@ def extract_embeds_array(arr):
     return np.array([entry["embed"] for entry in arr])
 
 
-def _cal_score(vec1, vec2):
+def cal_score(vec1, vec2):
     dot_product = np.dot(vec1, vec2)
     norm_vec1 = np.linalg.norm(vec1)
     norm_vec2 = np.linalg.norm(vec2)
@@ -164,7 +164,6 @@ def read_multiple_records_by_id(file_path, records_id: List[int],dictionary_form
 
     if dictionary_format: return records_dictionary
     return records
-
 
 # def generate_random(k=100):
 #     # Sample data: k vectors with 70 features each

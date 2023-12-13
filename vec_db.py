@@ -122,7 +122,8 @@ class VecDB:
         Level1_folder_path = self.database_path+'/Level1'
         final_result=semantic_query_ivf(data_file_path=self.file_path,index_folder_path=Level1_folder_path,query=query,top_k=top_k,n_regions=4)
 
-        sys.exit()
+        return final_result
+
         
            
         # # Retrieve from Level 1
