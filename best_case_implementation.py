@@ -79,7 +79,7 @@ class VecDBBest:
                 records.append(record)
             return records
 
-    def _build_index(self,Level_1_nbits=14, Level_2_nbits=3, Level_3_nbits=3,Level_4_nbits=3)-> None:
+    def _build_index(self,Level_1_nbits=10, Level_2_nbits=3, Level_3_nbits=3,Level_4_nbits=3)-> None:
     
         '''
         Build the Index
