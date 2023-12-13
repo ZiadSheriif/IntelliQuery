@@ -10,16 +10,16 @@ from Modules.IVF_basma import IVF_index,semantic_query_ivf
 
 
 class VecDB:
-    def __init__(self,file_path="./DataBase/data.bin", database_path = "./DataBase", new_db = True) -> None:
+    def __init__(self,file_path="./DataBase", new_db = True) -> None:
             '''
             Constructor
             '''
-            self.file_path =file_path # Data File Path
-            self.database_path= database_path  # Path of the Folder to Create Indexes
+            self.file_path =file_path+'/data.bin' # Data File Path
+            self.database_path= file_path  # Path of the Folder to Create Indexes
 
             if new_db:
-                if not os.path.exists(database_path):
-                    os.makedirs(database_path)
+                if not os.path.exists(self.database_path):
+                    os.makedirs(self.database_path)
 
                 else: 
                   # If New DataBase Empty DataBase Folder

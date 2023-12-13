@@ -115,7 +115,7 @@ def compare_results_print(worst_res,best_res,top_k):
     
 if __name__ == "__main__":
     print("Hello Semantic LSH")
-    number_of_records = 100000
+    number_of_records = 10000
     number_of_features = 70
     number_of_queries = 5
     top_k = 10
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # best_api = DataApi(file_path='./DataBase/data.bin',worst= False,database_path='./DataBase',delete_db=args.delete)
-    vector_db = VecDB(file_path='./DataBase/data.bin',database_path='./DataBase',new_db=args.delete)
+    vector_db = VecDB(file_path='./DataBase',new_db=args.delete)
     worst_api = DataApi(file_path='./DataBase/data_worst.csv',worst=True,database_path='./DataBase',delete_db=args.delete)
 
 
