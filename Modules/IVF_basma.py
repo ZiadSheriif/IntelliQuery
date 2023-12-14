@@ -199,16 +199,7 @@ def semantic_query_ivf(data_file_path,index_folder_path,query,top_k,n_regions):
     # # Sort Them
     # scores = sorted(scores, reverse=True)[:top_k]
     # return [s[1] for s in scores] 
-    # return scores
-
-
-
-
-
-
-
+    # return scores  
         
-        
-    
 
     return 
