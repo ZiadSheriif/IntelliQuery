@@ -7,7 +7,7 @@ import os
 from Modules.LSH import LSH_index, semantic_query_lsh
 from Modules.IVF_basma import IVF_index,semantic_query_ivf
 
-
+NUMBER_OF_RECORDS_BRUTE_FORCE = 10000
 
 class VecDB:
     def __init__(self,file_path="./DataBase", new_db = True) -> None:
@@ -30,6 +30,7 @@ class VecDB:
                     # if you need to add any head to the file
                     pass
 
+
             self.level1=None
 
     def insert_records(self, rows: List[Dict[int, Annotated[List[float], 70]]]):
@@ -48,7 +49,14 @@ class VecDB:
         '''
         Build the Index
         '''
+        file_size = os.path.getsize(self.file_path)
+        record_size=struct.calcsize(f"I{70}f")
+        n_records=file_size/record_size
+        self.number_of_clusters=n_records/NUMBER_OF_RECORDS_BRUTE_FORCE
+        print("Record Size: ",record_size)
+        print("File Size: ",file_size)
         print("Building Index ..........")   
+        print("number_of_clusters: ",self.number_of_clusters)
         # measure the time
         start = time.time()
 
@@ -59,7 +67,7 @@ class VecDB:
 
         # IVF Layer 1 Indexing
         chunk_size=1000
-        IVF_index(file_path=self.file_path,K_means_metric='euclidean',K_means_n_clusters=50,k_means_batch_size=chunk_size,k_means_max_iter=100,k_means_n_init='auto',chunk_size=chunk_size,index_folder_path=Level1_folder_path)
+        IVF_index(file_path=self.file_path,K_means_metric='euclidean',K_means_n_clusters=self.number_of_clusters,k_means_batch_size=chunk_size,k_means_max_iter=100,k_means_n_init='auto',chunk_size=chunk_size,index_folder_path=Level1_folder_path)
           
         
         # # Layer 1 Indexing
