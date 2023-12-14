@@ -19,7 +19,8 @@ def save_20M_record(data):
 
     empty_folder(folder_name)
 
-    files=['data_100K.bin',"data_1M.bin","data_5M.bin","data_10M.bin","data_15M.bin","data_20M.bin"]
+    # files=['data_100K.bin',"data_1M.bin","data_5M.bin","data_10M.bin","data_15M.bin","data_20M.bin"]
+    files=["data_10M.bin","data_15M.bin","data_20M.bin"]
     limits=[10**5,10**6,5*10**6,10**7,15*10**6,2*10**7]
     for i,file in enumerate(files):
         data_part=data[:limits[i]]
