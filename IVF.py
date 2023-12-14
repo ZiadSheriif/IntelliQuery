@@ -151,7 +151,7 @@ def semantic_query_ivf(data_file_path, index_folder_path, query, top_k, n_region
         # region_ids = read_binary_file(file_path=index_folder_path + f'/cluster{region}.bin', format='I')
         # records = read_multiple_records_by_id(file_path=data_file_path, records_id=region_ids, dictionary_format=True)
         records=read_binary_file_chunk(index_folder_path+f'/cluster{region}.bin', f'I{70}f', 0, chunk_size=100000000000,dictionary_format=True)
-        print("region",region,"&& len:",len(records))
+        # print("region",region,"&& len:",len(records))
 
 
         # Vectorize cosine similarity calculation
