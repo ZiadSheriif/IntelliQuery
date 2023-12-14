@@ -25,21 +25,29 @@ def IVF_index(file_path,K_means_metric,K_means_n_clusters,k_means_batch_size,k_m
     # kmeans = MiniBatchKMeans(n_clusters=K_means_n_clusters, batch_size=k_means_batch_size, max_iter=k_means_max_iter,n_init=k_means_n_init,random_state=42)
     kmeans=AgglomerativeClustering(n_clusters=K_means_n_clusters,linkage='average',metric='euclidean')
 
+    # Use the first Chunck to only get teh centroids
+    data_chunk=read_binary_file_chunk(file_path=file_path,record_format=f"I{70}f",start_index=0,chunk_size=chunk_size) #[{"id":,"embed":[]}]
+    # TODO Remove this loop
+    chunk_vectors=np.array([entry['embed'] for entry in data_chunk])
+    # kmeans.partial_fit(chunk_vectors)
+    kmeans.fit(chunk_vectors)
+
 
     # We need to Read Data from File chunk by chunk
     file_size = os.path.getsize(file_path)
     record_size=struct.calcsize(f"I{70}f")
     n_records=file_size/record_size
     no_chunks=math.ceil(n_records/chunk_size)
+    print(no_chunks,"--------------------")
 
-    # Step(1) Getting centroids:
-    # Loop to get the Kmeans Centroids
-    for i in range(no_chunks):
-        data_chunk=read_binary_file_chunk(file_path=file_path,record_format=f"I{70}f",start_index=i*chunk_size,chunk_size=chunk_size) #[{"id":,"embed":[]}]
-        # TODO Remove this loop
-        chunk_vectors=np.array([entry['embed'] for entry in data_chunk])
-        # kmeans.partial_fit(chunk_vectors)
-        kmeans.fit(chunk_vectors)
+    # # Step(1) Getting centroids:
+    # # Loop to get the Kmeans Centroids
+    # for i in range(no_chunks):
+    #     data_chunk=read_binary_file_chunk(file_path=file_path,record_format=f"I{70}f",start_index=i*chunk_size,chunk_size=chunk_size) #[{"id":,"embed":[]}]
+    #     # TODO Remove this loop
+    #     chunk_vectors=np.array([entry['embed'] for entry in data_chunk])
+    #     # kmeans.partial_fit(chunk_vectors)
+    #     kmeans.fit(chunk_vectors)
 
         
 
@@ -77,7 +85,10 @@ def IVF_index(file_path,K_means_metric,K_means_n_clusters,k_means_batch_size,k_m
 
         # Get Cluster for each one
         # labels=kmeans.predict(list(data_chunk.values())) #Each vector corresponding centroid
-        labels=K_means_labels
+        labels=kmeans.fit_predict(list(data_chunk.values())) #Each vector corresponding centroid
+        # print("bbbbbbbbbbb",len(set(labels)))
+        # return None
+        # labels=K_means_labels
 
 
         ids=np.array(list(data_chunk.keys()))

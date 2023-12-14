@@ -81,7 +81,7 @@ class PQ_IVF:
                 vectors[i]=vector
             
             # Get Cluster for each 1
-            labels=kmeans.predict(vectors) #Each vector corresponding centroid
+            labels=kmeans.fit_predict(vectors) #Each vector corresponding centroid
 
             # print("K_means_centroids",self.K_means_centroids)
             # print("data_chunk[0]",data_chunk[0])
