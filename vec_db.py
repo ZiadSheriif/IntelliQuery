@@ -52,7 +52,10 @@ class VecDB:
         file_size = os.path.getsize(self.file_path)
         record_size=struct.calcsize(f"I{70}f")
         n_records=file_size/record_size
-        self.number_of_clusters=int(n_records/NUMBER_OF_RECORDS_BRUTE_FORCE)
+        if(n_records<100000):
+            self.number_of_clusters=100
+        else: 
+            self.number_of_clusters=int(n_records/NUMBER_OF_RECORDS_BRUTE_FORCE)
         print("Record Size: ",record_size)
         print("File Size: ",file_size)
         print("Building Index ..........")   
