@@ -23,7 +23,7 @@ def IVF_index(file_path,K_means_metric,K_means_n_clusters,k_means_batch_size,k_m
     # ############################################################### ################################# ###############################################################
 
     # kmeans = MiniBatchKMeans(n_clusters=K_means_n_clusters, batch_size=k_means_batch_size, max_iter=k_means_max_iter,n_init=k_means_n_init,random_state=42)
-    kmeans=AgglomerativeClustering(n_clusters=K_means_n_clusters,linkage='average',metric='euclidean')
+    kmeans=AgglomerativeClustering(n_clusters=K_means_n_clusters,linkage='average',metric=K_means_metric)
 
     # Use the first Chunck to only get teh centroids
     data_chunk=read_binary_file_chunk(file_path=file_path,record_format=f"I{70}f",start_index=0,chunk_size=chunk_size) #[{"id":,"embed":[]}]

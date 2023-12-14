@@ -59,7 +59,7 @@ class VecDB:
 
         # IVF Layer 1 Indexing
         chunk_size=10000
-        IVF_index(file_path=self.file_path,K_means_metric='euclidean',K_means_n_clusters=20,k_means_batch_size=chunk_size,k_means_max_iter=100,k_means_n_init='auto',chunk_size=chunk_size,index_folder_path=Level1_folder_path)
+        IVF_index(file_path=self.file_path,K_means_metric='cosine',K_means_n_clusters=20,k_means_batch_size=chunk_size,k_means_max_iter=100,k_means_n_init='auto',chunk_size=chunk_size,index_folder_path=Level1_folder_path)
           
         
         # # Layer 1 Indexing
