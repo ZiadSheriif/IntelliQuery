@@ -1,7 +1,7 @@
 from utils import *
 from sklearn.cluster import MiniBatchKMeans
 
-
+from sklearn.cluster import AgglomerativeClustering
 
 def IVF_index(file_path,K_means_metric,K_means_n_clusters,k_means_batch_size,k_means_max_iter,k_means_n_init,chunk_size,index_folder_path):
     '''
@@ -22,7 +22,8 @@ def IVF_index(file_path,K_means_metric,K_means_n_clusters,k_means_batch_size,k_m
     # ############################################################### Step(1):Clustering Data from file ###############################################################
     # ############################################################### ################################# ###############################################################
 
-    kmeans = MiniBatchKMeans(n_clusters=K_means_n_clusters, batch_size=k_means_batch_size, max_iter=k_means_max_iter,n_init=k_means_n_init,random_state=42)
+    # kmeans = MiniBatchKMeans(n_clusters=K_means_n_clusters, batch_size=k_means_batch_size, max_iter=k_means_max_iter,n_init=k_means_n_init,random_state=42)
+    kmeans=AgglomerativeClustering(n_clusters=K_means_n_clusters,linkage='average',metric='euclidean')
 
 
     # We need to Read Data from File chunk by chunk
@@ -37,10 +38,24 @@ def IVF_index(file_path,K_means_metric,K_means_n_clusters,k_means_batch_size,k_m
         data_chunk=read_binary_file_chunk(file_path=file_path,record_format=f"I{70}f",start_index=i*chunk_size,chunk_size=chunk_size) #[{"id":,"embed":[]}]
         # TODO Remove this loop
         chunk_vectors=np.array([entry['embed'] for entry in data_chunk])
-        kmeans.partial_fit(chunk_vectors)
+        # kmeans.partial_fit(chunk_vectors)
+        kmeans.fit(chunk_vectors)
+
+        
 
     # Centroids
-    K_means_centroids=kmeans.cluster_centers_
+    # K_means_centroids=kmeans.cluster_centers_
+    K_means_labels=kmeans.labels_
+    print(len(set(K_means_labels)),',..................Basma')
+
+    # Calculate centroids for each cluster
+    K_means_centroids = np.zeros((K_means_n_clusters, 70))
+
+    for cluster_label in range(K_means_n_clusters):
+        cluster_points = chunk_vectors[K_means_labels == cluster_label]
+        K_means_centroids[cluster_label] = np.mean(cluster_points, axis=0)
+    print(K_means_centroids)
+    # return None
     # Saving Centroids #TODO Check precision of centroids after read and write in the file @Basma Elhoseny 
     write_binary_file(file_path=index_folder_path+'/centroids.bin',data_to_write=K_means_centroids,format=f"{70}f")
 
@@ -61,7 +76,8 @@ def IVF_index(file_path,K_means_metric,K_means_n_clusters,k_means_batch_size,k_m
         data_chunk=read_binary_file_chunk(file_path=file_path,record_format=f"I{70}f",start_index=i*chunk_size,chunk_size=chunk_size,dictionary_format=True) #[{109: np.array([70 dim])}]
 
         # Get Cluster for each one
-        labels=kmeans.predict(list(data_chunk.values())) #Each vector corresponding centroid
+        # labels=kmeans.predict(list(data_chunk.values())) #Each vector corresponding centroid
+        labels=K_means_labels
 
 
         ids=np.array(list(data_chunk.keys()))
