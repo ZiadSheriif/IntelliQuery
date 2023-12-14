@@ -163,6 +163,7 @@ def semantic_query_ivf(data_file_path,index_folder_path,query,top_k,n_regions):
     # Get the vectors of these regions
     # candidates=[]
     scores=[]
+    top_ids=np.full((10,), (-1, None), dtype=[('value', int), ('data', object)])
     for region in nearest_regions:
         # file_size = os.path.getsize(index_folder_path+f'/cluster{region}.bin')
         # record_size=struct.calcsize(f"I")
@@ -181,9 +182,12 @@ def semantic_query_ivf(data_file_path,index_folder_path,query,top_k,n_regions):
         for id,vector in records.items():
             score = cal_score(query, vector)
             scores.append((score, id))
-        scores = sorted(scores, reverse=True)[:top_k]
+        # scores = sorted(scores, reverse=True)[:top_k]
+        get_top_k(top_elements=top_ids,new_array=scores)
+        scores=None
+    return top_ids
     # return candidates
-    return [s[1] for s in scores]
+    # return [s[1] for s in scores]
     
 
   
