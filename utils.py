@@ -257,3 +257,17 @@ def read_multiple_records_by_id(file_path, records_id: List[int],dictionary_form
 
 # Test generate_random()
 # generate_random(10000)
+def get_top_k(top_elements,new_array):
+    print("new_array",new_array)
+
+    # print("top_elements",min(top_elements, key=lambda x: x[0]))
+    for new_element in new_array:
+        print("new_element", min(top_elements, key=lambda x: x[0]))
+        if(new_element> min(top_elements, key=lambda x: x[0])):
+            arg_min=min(enumerate(top_elements), key=lambda x: x[1][0])[0]
+            top_elements[arg_min]=new_element
+    return sorted(top_elements, reverse=True)
+
+# print(get_top_k([(-1,None),(-1,None),(10,None),(-1,None)],[(1,1),(5,2),(0,3),(-8,4),(10,5),(800,6),(810,7),(145,8),(36,9),(78,10)]))
+
+

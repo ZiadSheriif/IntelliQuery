@@ -136,6 +136,20 @@ def semantic_query_ivf(data_file_path,index_folder_path,query,top_k,n_regions):
     # Get the vectors of these regions
     # candidates=[]
     scores=[]
+    # top_ids= np.tile((-1, None), top_k)
+    top_ids= []
+    for _ in range(top_k):
+        top_ids.append((-1,None))
+    print("top_ids",top_ids)
+    # Convert the list to a NumPy array
+    # result_array = np.array(top_ids, dtype=[('value', int), ('data', object)])
+
+
+    # print("top_ids",top_ids)
+    # top_ids=np.full((top_k,), (-1, None), dtype=[('value', int), ('data', object)])
+    # top_ids=np.full((top_k,), (-1, None), dtype=[('value', int), ('data', object)])
+
+
     for region in nearest_regions:
         # file_size = os.path.getsize(index_folder_path+f'/cluster{region}.bin')
         # record_size=struct.calcsize(f"I")
@@ -153,8 +167,11 @@ def semantic_query_ivf(data_file_path,index_folder_path,query,top_k,n_regions):
         # Calculate the Cosine Similarity between the Query and the Vectors
         for id,vector in records.items():
             score = cal_score(query, vector)
-            scores.append((score, id))
-        scores = sorted(scores, reverse=True)[:top_k]
+            scores.append((*score, id))
+        get_top_k(top_elements=top_ids,new_array=scores)
+        scores=[]
+    return top_ids
+        # scores = sorted(scores, reverse=True)[:top_k]
     # return candidates
     return [s[1] for s in scores]
     
