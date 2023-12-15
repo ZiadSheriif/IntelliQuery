@@ -2,6 +2,9 @@ from utils import *
 from sklearn.cluster import MiniBatchKMeans
 
 
+from sklearn.cluster import KMeans
+
+
 
 def IVF_index(file_path,K_means_metric,K_means_n_clusters,k_means_batch_size,k_means_max_iter,k_means_n_init,chunk_size,index_folder_path):
     '''
@@ -71,7 +74,7 @@ def IVF_index(file_path,K_means_metric,K_means_n_clusters,k_means_batch_size,k_m
         # Add vectors to their corresponding region
         for label in set(labels):
             region_ids=ids[labels==label]  # get ids belonging to such region
-            region_vectors=vectors[labels==label]  # get vectors belonging to such region
+            # region_vectors=vectors[labels==label]  # get vectors belonging to such region
             # Open file of this Region(cluster) Just Once for every Region :D
             with open(index_folder_path+f'/cluster{label}.bin', "ab") as fout:
                 for i in range(len(region_ids)):
@@ -96,6 +99,49 @@ def IVF_index(file_path,K_means_metric,K_means_n_clusters,k_means_batch_size,k_m
 
     # print(count_region) 
     # print(np.sum(np.array(count_region)))
+                    
+
+    # ############################################################### ################################# ###############################################################
+    # ############################################################### Step(2):Clustering Data from Each Cluster #######################################################
+    # ############################################################### ################################# ###############################################################
+    # if(n_records>=5*10**6):
+    if(True):
+        print("2nd Level")
+        for region in range(K_means_n_clusters):
+            second_K_means_n_clusters=10
+            kmeans = KMeans(n_clusters=second_K_means_n_clusters, max_iter=k_means_max_iter,n_init=k_means_n_init,random_state=42)
+
+            region_ids=read_binary_file(file_path=index_folder_path+f'/cluster{region}.bin',format=f'I')
+
+            # Read The vectors values from the original data file
+            records=read_multiple_records_by_id(file_path=file_path, records_id=region_ids,dictionary_format=True)
+            region_ids=None #Empty
+            # print("records",records)
+
+
+            kmeans.fit(list(records.values()))
+            second_K_means_centroids=kmeans.cluster_centers_
+            folder_path=index_folder_path+f'/region{region}'
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)
+                print("Created new ", folder_path, "successfully")
+                
+            write_binary_file(file_path=folder_path+'/centroids.bin',data_to_write=second_K_means_centroids,format=f"{70}f")
+
+            # Add vectors to their corresponding region
+            for label in set(labels):
+                region_ids=ids[labels==label]  # get ids belonging to such region
+                # region_vectors=vectors[labels==label]  # get vectors belonging to such region
+                # Open file of this Region(cluster) Just Once for every Region :D
+                with open(folder_path+f'/cluster{label}.bin', "ab") as fout:
+                    for i in range(len(region_ids)):
+                        #TODO Check whether store id of the vector @Basma Elhoseny
+                        data = struct.pack(f"I", region_ids[i])
+                        fout.write(data)
+
+
+
+
     return
 
 
@@ -132,6 +178,21 @@ def semantic_query_ivf(data_file_path,index_folder_path,query,top_k,n_regions):
     # Get the nearest centroids [Not needed]
     # nearest_centroids = K_means_centroids[nearest_regions]
     # print(nearest_centroids)
+
+
+    # ################################################### ########################################################################## ###############################################################
+    # ################################################### Second Level Kmeans                    ###############################################################
+    # ################################################### ########################################################################## ###############################################################
+    # Step(1) Read Centroids
+    for region in nearest_regions:
+        second_K_means_centroids=read_binary_file(index_folder_path+f'/region{region}'+'/centroids.bin',f"{70}f") 
+        # Calculate distances using Euclidean distance (you can also use cosine similarity) [TODO check]
+        distances = np.linalg.norm(second_K_means_centroids - query, axis=1)
+
+        # Get indices of the nearest centroids
+        nearest_regions= np.argsort(distances)[:n_regions]
+
+    
 
     # Get the vectors of these regions
     # candidates=[]
