@@ -171,7 +171,7 @@ class VecDB:
         elif(n_records==10*10**6):
           n_probes=30
         elif(n_records==15*10**6):
-          n_probes=64
+          n_probes=256
         elif(n_records==20*10**6):
           n_probes=64
         # n_probes=0
