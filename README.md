@@ -10,7 +10,28 @@
 - <a href ="#contributors"> 🧑 Contributors</a>
 - <a href ="#license"> 🔒 License</a>
 
+## <img align="center"  width =50px  height =50px src="https://em-content.zobj.net/source/animated-noto-color-emoji/356/waving-hand_1f44b.gif"> Overview <a id = "Overview"></a>
+Given the embedding of the search query we can efficent get the top matching k results form DB with 20M document.The objective of this project is to design and implement an indexing system for a
+semantic search database.
 
+
+## <img  align= center width=50px height=50px src="https://cdn.pixabay.com/animation/2022/07/31/06/27/06-27-17-124_512.gif">Get Started <a id = "started"></a>
+### Infernce Mode
+```
+# Check Final Notebook
+https://github.com/ZiadSheriif/sematic_search_DB/blob/main/Evaluate_ADB_Project.ipynb
+```
+### Run Locally
+```
+# Clone Repo
+git clone https://github.com/ZiadSheriif/sematic_search_DB.git
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run Indexer
+$ python ./src/evaluation.py
+```
 
 https://media0.giphy.com/media/eIqtmxcj5HFZXXqOXW/giphy.gif?cid=6c09b952yyq76z2ocl7fds9u12in3ufi96uceo7al4z92ytt&ep=v1_stickers_related&rid=giphy.gif&ct=s
 
@@ -22,8 +43,8 @@ https://media0.giphy.com/media/eIqtmxcj5HFZXXqOXW/giphy.gif?cid=6c09b952yyq76z2o
 <table align="center" >
   <tr>
     <td align="center"><a href="https://github.com/BasmaElhoseny01"><img src="https://avatars.githubusercontent.com/u/72309546?v=4" width="150px;" alt=""/><br /><sub><b>Basma Elhoseny</b></sub></a><br /></td>
-    <td align="center"><a href="https://github.com/yasmineghanem"><img src="https://avatars.githubusercontent.com/u/74925701?v=4" width="150px;" alt=""/><br /><sub><b>Yasmine Ghanem</b></sub></a><br /></td>
-    <td align="center"><a href="https://github.com/Mohabz-911" ><img src="https://avatars.githubusercontent.com/u/68201932?v=4" width="150px;" alt=""/><br /><sub><b>Mohab Zaghloul</b></sub></a><br />
+    <td align="center"><a href=""><img src="" width="150px;" alt=""/><br /><sub><b>Yasmine Ghanem</b></sub></a><br /></td>
+    <td align="center"><a href="" ><img src="https://avatars.githubusercontent.com/u/68201932?v=4" width="150px;" alt=""/><br /><sub><b>Mohab Zaghloul</b></sub></a><br />
     </td>
      <td align="center"><a href="https://github.com/YasminElgendi"><img src="https://avatars.githubusercontent.com/u/54359829?v=4" width="150px;" alt=""/><br /><sub><b>Yasmin Elgendi</b></sub></a><br /></td>
   </tr>
