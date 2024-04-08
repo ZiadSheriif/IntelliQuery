@@ -7,6 +7,9 @@
 - <a href ="#Overview"> Overview</a>
 - <a href ="#started"> Get Started</a>
 - <a href ="#modules">  Methods</a>
+  - IVF
+  - LSH
+  - PQ
 - <a href ="#contributors"> 🧑 Contributors</a>
 - <a href ="#license"> 🔒 License</a>
 
@@ -33,8 +36,21 @@ pip install -r requirements.txt
 $ python ./src/evaluation.py
 ```
 
-https://media0.giphy.com/media/eIqtmxcj5HFZXXqOXW/giphy.gif?cid=6c09b952yyq76z2ocl7fds9u12in3ufi96uceo7al4z92ytt&ep=v1_stickers_related&rid=giphy.gif&ct=s
 
+## <img  align= center width=50px height=50px src="https://media3.giphy.com/media/l0G372BYKnKuBkKxjo/giphy.gif?cid=6c09b952k9s08y3588aqm3f31dpyz9u0qnfe0gh5s8tyj0l4&ep=v1_stickers_related&rid=giphy.gif&ct=s">Methods<a id = "started"></a>
+### IVF 
+This is out final Approach with Some Enhancements 
+1. Changed MiniBatchKMeans to regular KMeans
+2. We calculate initial centroids with just the first chunk of data
+3. Introduced parallel processing for different regions
+<img src="https://miro.medium.com/v2/resize:fit:786/format:webp/1*CSwHz4IlVnqufq1QdmMtVg.png">
+
+### LSH
+<img src="https://cdn.sanity.io/images/vr8gru94/production/862f88182a796eb16942c47d93ee03ba4cdaee4d-1920x1080.png">
+
+### PQ
+<img src="https://miro.medium.com/v2/resize:fit:786/format:webp/1*98eO9hCC3Wzp8AURuZT-NA.png">
+### PQ_LSH
 
 <!-- Contributors -->
 ## <img  align= center width=50px height=50px src="https://media1.giphy.com/media/WFZvB7VIXBgiz3oDXE/giphy.gif?cid=6c09b952tmewuarqtlyfot8t8i0kh6ov6vrypnwdrihlsshb&rid=giphy.gif&ct=s"> Contributors <a id = "contributors"></a>
