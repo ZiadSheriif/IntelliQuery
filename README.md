@@ -2,19 +2,22 @@
 <img src="https://media.dev.to/cdn-cgi/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Fikqfpsu3jd60em4s0ztn.png">
 
 
-## <img align= center width=50px height=50px src="https://thumbs.gfycat.com/HeftyDescriptiveChimneyswift-size_restricted.gif"> Table of Contents
+## 📝 Table of Contents
 
-- <a href ="#Overview"> Overview</a>
-- <a href ="#started"> Get Started</a>
-- <a href ="#methods"> Methods</a>
-  - <a href="ivf">IVF</a>
-  - <a href="lsh">LSH</a>
-  - <a href="pq">PQ</a>
-  - <a href="pq_lsh">PQ LSH</a>
-- <a href ="#contributors">Contributors</a>
-- <a href ="#license">License</a>
+- [📝 Table of Contents](#-table-of-contents)
+- [📙 Overview ](#-overview-)
+- [Get Started ](#get-started-)
+  - [Infernce Mode](#infernce-mode)
+  - [Run Locally](#run-locally)
+- [Methods](#methods)
+  - [Inverted File Inedex (IVF) ](#inverted-file-inedex-ivf-)
+  - [Local Sensitive Hashing (LSH) ](#local-sensitive-hashing-lsh-)
+  - [Product Qunatization (PQ) ](#product-qunatization-pq-)
+  - [PQ-LSH ](#pq-lsh-)
+- [🕴 Contributors ](#-contributors-)
+- [📃 License ](#-license-)
 
-## <img align="center"  width =50px  height =50px src="https://em-content.zobj.net/source/animated-noto-color-emoji/356/waving-hand_1f44b.gif"> Overview <a id = "Overview"></a>
+## 📙 Overview <a id = "Overview"></a>
 Given the embedding of the search query we can efficent get the top matching k results form DB with 20M document.The objective of this project is to design and implement an indexing system for a
 semantic search database.
 
@@ -55,10 +58,10 @@ This is out final Approach with Some Enhancements
 ### Product Qunatization (PQ) <a id = "pq"></a>
 <img src="https://miro.medium.com/v2/resize:fit:786/format:webp/1*98eO9hCC3Wzp8AURuZT-NA.png">
 
-### PQ_LSH <a id = "pq_lsh"></a>
+### PQ-LSH <a id = "pq-lsh"></a>
 It Combines both LSH & PQ 
 <!-- Contributors -->
-## <img  align= center width=50px height=50px src="https://media1.giphy.com/media/WFZvB7VIXBgiz3oDXE/giphy.gif?cid=6c09b952tmewuarqtlyfot8t8i0kh6ov6vrypnwdrihlsshb&rid=giphy.gif&ct=s"> Contributors <a id = "contributors"></a>
+## 🕴 Contributors <a name = "Contributors"></a>
 
 <!-- Contributors list -->
 <table align="center" >
@@ -73,5 +76,6 @@ It Combines both LSH & PQ
 
 
 
-## <img  align= center width=50px height=50px src="https://media1.giphy.com/media/ggoKD4cFbqd4nyugH2/giphy.gif?cid=6c09b9527jpi8kfxsj6eswuvb7ay2p0rgv57b7wg0jkihhhv&rid=giphy.gif&ct=s"> License <a id = "license"></a>
+## 📃 License <a name = "license"></a>
+
 This software is licensed under MIT License, See [License](https://github.com/ZiadSheriif/sematic_search_DB/blob/main/LICENSE) for more information ©Ziad Sherif.
