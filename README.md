@@ -1,4 +1,4 @@
-<h1>Semantic Search DB</h1>
+<h1>IntelliQuery</h1>
 <img src="https://media.dev.to/cdn-cgi/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Fikqfpsu3jd60em4s0ztn.png">
 
 
@@ -21,19 +21,22 @@ semantic search database.
 
 ## <img  align= center width=50px height=50px src="https://cdn.pixabay.com/animation/2022/07/31/06/27/06-27-17-124_512.gif">Get Started <a id = "started"></a>
 ### Infernce Mode
+***Check Final Notebook***
 ```
-# Check Final Notebook
-https://github.com/ZiadSheriif/sematic_search_DB/blob/main/Evaluate_ADB_Project.ipynb
+https://github.com/ZiadSheriif/IntelliQuery/blob/main/Evaluate_ADB_Project.ipynb
 ```
 ### Run Locally
+
+***Clone Repo***
 ```
-# Clone Repo
-git clone https://github.com/ZiadSheriif/sematic_search_DB.git
-
-# Install dependencies
+git clone https://github.com/ZiadSheriif/IntelliQuery.git
+```
+***Install dependencies***
+```
 pip install -r requirements.txt
-
-# Run Indexer
+```
+***Run Indexer***
+```
 $ python ./src/evaluation.py
 ```
 
