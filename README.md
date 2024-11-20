@@ -1,7 +1,4 @@
 <h1>IntelliQuery</h1>
-<img src="https://media.dev.to/cdn-cgi/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Fikqfpsu3jd60em4s0ztn.png">
-
-
 ## 📝 Table of Contents
 
 - [📝 Table of Contents](#-table-of-contents)
